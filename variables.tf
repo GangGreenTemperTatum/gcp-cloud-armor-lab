@@ -8,17 +8,17 @@ variable "region_zone" {
 
 variable "project_name" {
   description = "The ID of the Google Cloud project"
-  default   = "gcp-cloud-armor-waf-lab"
-  sensitive = true
+  default     = "gcp-cloud-armor-waf-lab"
+  sensitive   = true
 }
 
 variable "credentials_file_path" {
   description = "Path to the JSON file used to describe your account credentials"
-  default = "./gcp-cloud-armor-waf-lab-78fe4d97f8b5.json"
+  default     = "./gcp-cloud-armor-waf-lab-78fe4d97f8b5.json"
 }
 
 variable "ip_white_list" {
   description = "A list of ip addresses that can be white listed through security policies"
-  type    = list(string)
-  default = ["23.16.163.89/32","130.211.0.0/22","35.191.0.0/16"]
+  type        = list(string)
+  default     = ["23.16.163.89/32", "130.211.0.0/22", "35.191.0.0/16"]
 }

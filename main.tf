@@ -41,7 +41,7 @@ resource "google_compute_firewall" "cluster1" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "43"]
+    ports    = ["80", "443"]
   }
 
 source_ranges = var.ip_white_list

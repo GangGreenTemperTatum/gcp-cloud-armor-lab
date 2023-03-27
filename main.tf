@@ -113,20 +113,28 @@ resource "google_compute_backend_service" "website" {
   health_checks = [google_compute_http_health_check.health.self_link]
 }
 
+# -------------------------------------------------------------------------------------
+# WAF Mod SECURITY RULES
+# -------------------------------------------------------------------------------------
+
 # Cloud Armor Security policies
 resource "google_compute_security_policy" "security-policy-1" {
   name        = "armor-security-policy"
   description = "NGINX GCP Cloud Armor Policy"
+  project     = var.project_name
 
+  advanced_options_config {
+    log_level    = var.log_level
+    json_parsing = var.json_parsing
+  }
   adaptive_protection_config {
     layer_7_ddos_defense_config {
       enable = true
     }
   }
-
   # Reject all traffic that hasn't been whitelisted.
   rule {
-    action   = "deny(403)"
+    action   = "deny(404)"
     priority = "2147483647"
 
     match {
@@ -140,22 +148,112 @@ resource "google_compute_security_policy" "security-policy-1" {
     description = "Default rule, higher priority overrides it"
   }
 
-  # Whitelist traffic from certain ip address
-  rule {
-    action   = "allow"
-    priority = "1"
 
-    match {
-      versioned_expr = "SRC_IPS_V1"
-
-      config {
-        src_ip_ranges = var.ip_white_list
-      }
+# --------------------------------- 
+# Default rules
+# --------------------------------- 
+    dynamic "rule" {
+        for_each = var.default_rules
+        content {
+            action      = rule.value.action
+            priority    = rule.value.priority
+            description = rule.value.description
+            preview     = rule.value.preview
+            match {
+                versioned_expr = rule.value.versioned_expr
+                config {
+                    src_ip_ranges = rule.value.src_ip_ranges
+                }
+            }
+        }  
+    }
+    
+# --------------------------------- 
+# Throttling traffic rules
+# --------------------------------- 
+    dynamic "rule" {
+        for_each = var.throttle_rules
+        content {
+            action      = rule.value.action
+            priority    = rule.value.priority
+            description = rule.value.description
+            preview     = rule.value.preview
+            match {
+                versioned_expr = rule.value.versioned_expr
+                config {
+                    src_ip_ranges = rule.value.src_ip_ranges
+                }
+            }
+            rate_limit_options {
+                conform_action  = rule.value.conform_action
+                exceed_action   = rule.value.exceed_action
+                enforce_on_key  = rule.value.enforce_on_key
+                rate_limit_threshold {
+                    count           = rule.value.rate_limit_threshold_count
+                    interval_sec    = rule.value.rate_limit_threshold_interval_sec
+                }
+            } 
+        }
     }
 
-    description = "allow traffic from whitelisted IP ranges"
-  }
+# --------------------------------- 
+# Country limitation
+# --------------------------------- 
+    dynamic "rule" {
+        for_each = var.countries_rules
+        content {
+            action      = rule.value.action
+            priority    = rule.value.priority
+            description = rule.value.description
+            preview     = rule.value.preview
+            match {
+                expr {
+                    expression = rule.value.expression
+                }
+            }
+        }
+    }
+
+# --------------------------------- 
+# OWASP top 10 rules
+# --------------------------------- 
+    dynamic "rule" {
+        for_each = var.owasp_rules
+        content {
+            action      = rule.value.action
+            priority    = rule.value.priority
+            description = rule.value.description
+            preview     = rule.value.preview
+            match {
+                expr {
+                    expression = rule.value.expression
+                }
+            }
+        }
+    }
+
+# --------------------------------- 
+# Custom Log4j rule
+# --------------------------------- 
+    dynamic "rule" {
+        for_each = var.apache_log4j_rule
+        content {
+            action      = rule.value.action
+            priority    = rule.value.priority
+            description = rule.value.description
+            preview     = rule.value.preview
+            match {
+                expr {
+                    expression = rule.value.expression
+                }
+            }
+        }
+    }
 }
+
+# -------------------------------------------------------------------------------------
+# EOF WAF Mod SECURITY RULES
+# -------------------------------------------------------------------------------------
 
 # Front end of the load balancer
 resource "google_compute_global_forwarding_rule" "default" {
@@ -189,6 +287,11 @@ resource "google_compute_url_map" "default" {
   }
 }
 
-output "ip" {
+# A variable for extracting the external IP address of the VM
+output "Frontend-LB-for-NGINX-ip" {
   value = google_compute_global_forwarding_rule.default.ip_address
 }
+
+#output "cURL-connectivity" {
+#  value = startswith("curl https://", ["google_compute_global_forwarding_rule.default.ip_address"])
+#}

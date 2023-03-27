@@ -36,17 +36,33 @@ resource "google_compute_instance" "cluster1" {
 }
 
 resource "google_compute_firewall" "cluster1" {
-  name    = "armor-firewall"
-  network = "default"
+  name     = "armor-firewall"
+  network  = "default"
+  priority = 1000
 
   allow {
     protocol = "tcp"
     ports    = ["80", "443"]
   }
 
-source_ranges = var.ip_white_list
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
+
+  source_ranges = var.ip_white_list
 }
 
+resource "google_compute_firewall" "explicitdeny" {
+  name     = "explicit-deny"
+  network  = "default"
+  priority = 1001
+
+  deny {
+    protocol = "all"
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
 resource "google_compute_instance_group" "webservers" {
   name        = "instance-group-all"
   description = "An instance group for the single GCE instance"
@@ -100,7 +116,7 @@ resource "google_compute_backend_service" "website" {
 # Cloud Armor Security policies
 resource "google_compute_security_policy" "security-policy-1" {
   name        = "armor-security-policy"
-  description = "example security policy"
+  description = "NGINX GCP Cloud Armor Policy"
 
   # Reject all traffic that hasn't been whitelisted.
   rule {
@@ -121,7 +137,7 @@ resource "google_compute_security_policy" "security-policy-1" {
   # Whitelist traffic from certain ip address
   rule {
     action   = "allow"
-    priority = "1000"
+    priority = "1"
 
     match {
       versioned_expr = "SRC_IPS_V1"

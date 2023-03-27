@@ -20,5 +20,5 @@ variable "credentials_file_path" {
 variable "ip_white_list" {
   description = "A list of ip addresses that can be white listed through security policies"
   type        = list(string)
-  default     = ["23.16.163.89/32", "130.211.0.0/22", "35.191.0.0/16"]
+  default     = ["23.16.163.89/32"]
 }

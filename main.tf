@@ -118,6 +118,12 @@ resource "google_compute_security_policy" "security-policy-1" {
   name        = "armor-security-policy"
   description = "NGINX GCP Cloud Armor Policy"
 
+  adaptive_protection_config {
+    layer_7_ddos_defense_config {
+      enable = true
+    }
+  }
+
   # Reject all traffic that hasn't been whitelisted.
   rule {
     action   = "deny(403)"

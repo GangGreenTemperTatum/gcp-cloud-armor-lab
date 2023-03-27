@@ -44,7 +44,7 @@ resource "google_compute_firewall" "cluster1" {
     ports    = ["80", "43"]
   }
 
-source_tags = ["default"]
+source_ranges = var.ip_white_list
 }
 
 resource "google_compute_instance_group" "webservers" {
@@ -131,7 +131,7 @@ resource "google_compute_security_policy" "security-policy-1" {
       }
     }
 
-    description = "allow traffic from 192.0.2.0/24"
+    description = "allow traffic from whitelisted IP ranges"
   }
 }
 

@@ -84,11 +84,40 @@ variable "default_rules_2" {
 # --------------------------------- 
 # Throttling traffic rules
 # --------------------------------- 
-variable "throttle_rules" {
+variable "throttle_rules_auth" {
   default = {
     def_rule = {
       action                            = "throttle"
       priority                          = "4000"
+      expression                        = "request.path.contains('auth')"
+      description                       = "Prevent Brute Force and Creds Stuffing Attacks"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "ALL" #https://cloud.google.com/armor/docs/rate-limiting-overview#identifying_clients_for_rate_limiting
+      rate_limit_threshold_count        = "10"
+      rate_limit_threshold_interval_sec = "10"
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    preview                           = bool
+    })
+  )
+}
+variable "throttle_rules" {
+  default = {
+    def_rule = {
+      action                            = "throttle"
+      priority                          = "4001"
       versioned_expr                    = "SRC_IPS_V1"
       src_ip_ranges                     = ["*"]
       description                       = "Throttling traffic rule"
@@ -112,6 +141,52 @@ variable "throttle_rules" {
     rate_limit_threshold_count        = number
     rate_limit_threshold_interval_sec = number
     preview                           = bool
+    })
+  )
+}
+
+# --------------------------------- 
+# Bot Detection & Captcha rules
+# --------------------------------- 
+variable "bot_captcha_rules" {
+  default = {
+    def_rule = {
+      action      = "deny(404)"
+      priority    = "4002"
+      expression  = "(token.recaptcha_session.valid) && (token.recaptcha_action.valid)"
+      description = "Deny Bots from ReCaptcha Session Tokens"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+# --------------------------------- 
+# Scanners, Crawlers and Malicious Recon/OSINT
+# --------------------------------- 
+variable "crawler_osint_rules" {
+  default = {
+    def_rule = {
+      action      = "deny(404)"
+      priority    = "4003"
+      expression  = "request.path.contains('admin') || request.path.contains('robots')"
+      description = "Stop malicious crawling/OSINT activity"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
     })
   )
 }

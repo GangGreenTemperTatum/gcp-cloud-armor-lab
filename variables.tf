@@ -97,7 +97,7 @@ variable "throttle_rules" {
       enforce_on_key                    = "ALL" #https://cloud.google.com/armor/docs/rate-limiting-overview#identifying_clients_for_rate_limiting
       rate_limit_threshold_count        = "100"
       rate_limit_threshold_interval_sec = "60"
-      preview                           = true
+      preview                           = false
     }
   }
   type = map(object({
@@ -126,7 +126,7 @@ variable "countries_rules" {
       priority    = "3000"
       expression  = "'[CN, RU]'.contains(origin.region_code)"
       description = "Deny if region code is listed"
-      preview     = true
+      preview     = false
     }
   }
   type = map(object({
@@ -160,7 +160,7 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
 
       ### Detect Level 1,2,3 & 4
-      expression = "evaluatePreconfiguredExpr('sqli-stable')"
+      expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#cross-site_scripting_xss
     rule_xss = {
@@ -173,7 +173,7 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('xss-stable',['owasp-crs-v030001-id941150-xss','owasp-crs-v030001-id941320-xss','owasp-crs-v030001-id941330-xss','owasp-crs-v030001-id941340-xss'])"
 
       ### Detect Level 1 & 2
-      expression = "evaluatePreconfiguredExpr('xss-stable')"
+      expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#local_file_inclusion_lfi
     rule_lfi = {
@@ -183,7 +183,7 @@ variable "owasp_rules" {
       preview     = true
 
       ### Detect Level 1
-      expression = "evaluatePreconfiguredExpr('lfi-stable')"
+      expression = "evaluatePreconfiguredExpr('lfi-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#remote_code_execution_rce
     rule_rce = {
@@ -193,7 +193,7 @@ variable "owasp_rules" {
       preview     = true
 
       ### Detect Level 1
-      expression = "evaluatePreconfiguredExpr('rce-stable')"
+      expression = "evaluatePreconfiguredExpr('rce-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#remote_file_inclusion_rfi
     rule_rfi = {
@@ -206,7 +206,7 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('rfi-stable', ['owasp-crs-v030001-id931130-rfi'])"
 
       ### Detect Level 1 & 2
-      expression = "evaluatePreconfiguredExpr('rfi-stable')"
+      expression = "evaluatePreconfiguredExpr('rfi-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#method_enforcement
     rule_methodenforcement = {
@@ -216,7 +216,7 @@ variable "owasp_rules" {
       preview     = true
 
       ### Detect Level 1
-      expression = "evaluatePreconfiguredExpr('methodenforcement-stable')"
+      expression = "evaluatePreconfiguredExpr('methodenforcement-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#scanner_detection
     rule_scandetection = {
@@ -229,7 +229,7 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('scannerdetection-stable',['owasp-crs-v030001-id913101-scannerdetection','owasp-crs-v030001-id913102-scannerdetection'])"
 
       ### Detect Level 1 & 2
-      expression = "evaluatePreconfiguredExpr('scannerdetection-stable')"
+      expression = "evaluatePreconfiguredExpr('scannerdetection-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#protocol_attack
     rule_protocolattack = {
@@ -245,7 +245,7 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('protocolattack-stable',['owasp-crs-v030001-id921170-protocolattack'])"
 
       ### Detect Level 1,2 & 3
-      expression = "evaluatePreconfiguredExpr('protocolattack-stable')"
+      expression = "evaluatePreconfiguredExpr('protocolattack-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#php
     rule_php = {
@@ -261,7 +261,7 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('php-stable',['owasp-crs-v030001-id933131-php','owasp-crs-v030001-id933161-php','owasp-crs-v030001-id933111-php'])"
 
       ### Detect Level 1,2 & 3
-      expression = "evaluatePreconfiguredExpr('php-stable')"
+      expression = "evaluatePreconfiguredExpr('php-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#session_fixation
     rule_sessionfixation = {
@@ -271,7 +271,7 @@ variable "owasp_rules" {
       preview     = true
 
       ### Detect Level 1
-      expression = "evaluatePreconfiguredExpr('sessionfixation-stable')"
+      expression = "evaluatePreconfiguredExpr('sessionfixation-v33-stable')"
     }
   }
   type = map(object({
@@ -284,7 +284,7 @@ variable "owasp_rules" {
   )
 }
 # --------------------------------- 
-# Custom Log4j rules
+# Custom GCP-Driven Log4j rules
 # --------------------------------- 
 variable "apache_log4j_rule" {
   default = {
@@ -292,7 +292,7 @@ variable "apache_log4j_rule" {
     rule_apache_log4j = {
       action      = "deny(403)"
       priority    = "2000"
-      description = "Apache Log4j CVE-2021-44228"
+      description = "Apache Log4j CVE-2021-44228 and CVE-2021-45046"
       preview     = true
 
       ### Detect Level 1 Basic rule
@@ -306,6 +306,29 @@ variable "apache_log4j_rule" {
 
       ### Detect Level 1 & 3 - very sensitive
       expression = "evaluatePreconfiguredExpr('cve-canary')"
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    description = string
+    preview     = bool
+    expression  = string
+    })
+  )
+}
+
+variable "json-sqli-canary_rule" {
+  default = {
+    # https://cloud.google.com/armor/docs/rule-tuning#cves_and_other_vulnerabilities
+    rule_apache_log4j = {
+      action      = "deny(403)"
+      priority    = "2001"
+      description = "JSON-based SQL injection bypass vulnerability 942550-sqli"
+      preview     = true
+
+      ### Detect Level 2
+      expression = "evaluatePreconfiguredExpr('json-sqli-canary')"
     }
   }
   type = map(object({

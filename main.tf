@@ -13,6 +13,17 @@ provider "google" {
   zone        = var.region_zone
 }
 
+# Define the "default VPC network 'default'"
+resource "google_compute_network" "default" {
+  name                            = "default"
+  auto_create_subnetworks         = true
+  delete_default_routes_on_create = false
+  description                     = "Default network for the project"
+  project                         = var.project_name
+  routing_mode                    = "REGIONAL"
+# Enable the Private Service Access for GCP to enable Cloud IDS
+}
+
 # Set up a backend to be proxied to:
 # A single instance in a pool running nginx with port 80 open will allow end to end network testing
 resource "google_compute_instance" "cluster1" {
@@ -238,9 +249,9 @@ resource "google_compute_security_policy" "security-policy-1" {
     }
   }
 
-# --------------------------------- 
-# Scanners, Crawlers and Malicious Recon/OSINT
-# --------------------------------- 
+  # --------------------------------- 
+  # Scanners, Crawlers and Malicious Recon/OSINT
+  # --------------------------------- 
   dynamic "rule" {
     for_each = var.crawler_osint_rules
     content {

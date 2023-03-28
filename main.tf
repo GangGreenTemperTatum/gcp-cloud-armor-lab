@@ -22,6 +22,7 @@ resource "google_compute_network" "default" {
   project                         = var.project_name
   routing_mode                    = "REGIONAL"
 # Enable the Private Service Access for GCP to enable Cloud IDS
+# https://github.com/terraform-google-modules/terraform-docs-samples/blob/main/cloud_sql/mysql_instance_private_ip/main.tf
 }
 
 # Set up a backend to be proxied to:

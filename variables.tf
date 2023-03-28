@@ -251,7 +251,7 @@ variable "owasp_rules" {
     rule_php = {
       action      = "deny(403)"
       priority    = "1008"
-      description = "PHP"
+      description = "PHP Injection Attack"
       preview     = true
 
       ### Detect Level 1
@@ -267,13 +267,31 @@ variable "owasp_rules" {
     rule_sessionfixation = {
       action      = "deny(403)"
       priority    = "1009"
-      description = "Session Fixation"
+      description = "Session Fixation Attack"
       preview     = true
 
       ### Detect Level 1
       expression = "evaluatePreconfiguredExpr('sessionfixation-v33-stable')"
     }
-  }
+    rule_java = {
+      action      = "deny(403)"
+      priority    = "1010"
+      description = "Java Attack"
+      preview     = true
+
+      ### Detect Level 1, 2 and 3
+      expression = "evaluatePreconfiguredExpr('java-v33-stable')"
+    }
+    rule_nodejs = {
+      action      = "deny(403)"
+      priority    = "1011"
+      description = "NodeJS Attack"
+      preview     = true
+
+      ### Detect Level 1, 2 and 3
+      expression = "evaluatePreconfiguredExpr('nodejs-v33-stable')"
+    }
+  } # End of `rule` definition
   type = map(object({
     action      = string
     priority    = string
@@ -283,8 +301,10 @@ variable "owasp_rules" {
     })
   )
 }
+
+
 # --------------------------------- 
-# Custom GCP-Driven Log4j rules
+# Custom GCP-Driven CVE & Log4j rules
 # --------------------------------- 
 variable "apache_log4j_rule" {
   default = {

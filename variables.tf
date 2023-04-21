@@ -213,6 +213,33 @@ variable "countries_rules" {
     })
   )
 }
+
+# ---------------------------------
+# Banned Countries - I.E OFAC & Global Affairs
+# Country Codes - https://wits.worldbank.org/wits/wits/witshelp/content/codes/country_codes.htm
+# ---------------------------------
+variable "banned_countries" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "3001"
+      expression  = <<-EOT
+        '[ZWE,ZMB]'.contains(origin.region_code)
+      EOT
+      description = "Deny if region code is listed"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
 # --------------------------------- 
 # OWASP top 10 rules
 # --------------------------------- 

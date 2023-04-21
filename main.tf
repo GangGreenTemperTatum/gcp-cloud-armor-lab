@@ -286,6 +286,24 @@ resource "google_compute_security_policy" "security-policy-1" {
     }
   }
 
+  # ---------------------------------
+  # Banned Countries - I.E OFAC & Global Affairs
+  # ---------------------------------
+  dynamic "rule" {
+    for_each = var.banned_countries
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+  
   # --------------------------------- 
   # OWASP top 10 rules
   # --------------------------------- 

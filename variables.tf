@@ -84,11 +84,45 @@ variable "default_rules_2" {
 # --------------------------------- 
 # Throttling traffic rules
 # --------------------------------- 
-variable "throttle_rules_auth" {
+variable "throttle_rules_endpoints" {
   default = {
     def_rule = {
       action                            = "throttle"
       priority                          = "4000"
+      expression                        = <<-EOT
+        inIpRange(origin.ip, '23.16.0.0/15') && request.method.matches('POST') || request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+      EOT
+      description                       = "Prevent rate limit abuse"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "50"
+      rate_limit_threshold_interval_sec = "10"
+      #ban_http_request_count            = 10000
+      #ban_http_request_interval_sec     = 600
+      #ban_duration_sec                  = 120
+      preview = true
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    preview                           = bool
+    })
+  )
+}
+variable "throttle_rules_auth" {
+  default = {
+    def_rule = {
+      action                            = "throttle"
+      priority                          = "4001"
       expression                        = "request.path.contains('auth')"
       description                       = "Prevent Brute Force and Creds Stuffing Attacks"
       conform_action                    = "allow"
@@ -117,10 +151,10 @@ variable "throttle_rules" {
   default = {
     def_rule = {
       action                            = "throttle"
-      priority                          = "4001"
+      priority                          = "4002"
       versioned_expr                    = "SRC_IPS_V1"
-      src_ip_ranges                     = ["*"]
-      description                       = "Throttling traffic rule"
+      src_ip_ranges                     = ["103.235.111.255/32"]
+      description                       = "Throttling traffic generic rule placeholder random IP from Wallis and Futuna"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "ALL" #https://cloud.google.com/armor/docs/rate-limiting-overview#identifying_clients_for_rate_limiting
@@ -224,7 +258,7 @@ variable "banned_countries" {
       action      = "deny(502)"
       priority    = "3001"
       expression  = <<-EOT
-        '[ZWE,ZMB]'.contains(origin.region_code)
+        '[BY, SY]'.contains(origin.region_code)
       EOT
       description = "Deny if region code is listed"
       preview     = false

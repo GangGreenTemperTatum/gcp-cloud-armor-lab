@@ -231,7 +231,7 @@ variable "crawler_osint_rules" {
 variable "countries_rules" {
   default = {
     def_rule = {
-      action      = "deny(403)"
+      action      = "deny(502)"
       priority    = "3000"
       expression  = "'[CN, RU]'.contains(origin.region_code)"
       description = "Deny if region code is listed"
@@ -258,9 +258,9 @@ variable "banned_countries" {
       action      = "deny(502)"
       priority    = "3001"
       expression  = <<-EOT
-        '[BY, SY]'.contains(origin.region_code)
+        '[RU, SY, BY, KP, CN, IR]'.contains(origin.region_code)
       EOT
-      description = "Deny if region code is listed"
+      description = "Block prohibited countries as per ISO 3166-1 alpha 2 region codes"
       preview     = false
     }
   }

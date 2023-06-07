@@ -256,7 +256,7 @@ variable "banned_countries" {
   default = {
     def_rule = {
       action      = "deny(502)"
-      priority    = "3001"
+      priority    = "100"
       expression  = <<-EOT
         '[RU, SY, BY, KP, CN, IR]'.contains(origin.region_code)
       EOT

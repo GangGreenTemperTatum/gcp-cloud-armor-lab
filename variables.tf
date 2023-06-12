@@ -90,7 +90,7 @@ variable "throttle_rules_endpoints" {
       action                            = "throttle"
       priority                          = "4000"
       expression                        = <<-EOT
-        inIpRange(origin.ip, '23.16.0.0/15') && request.method.matches('POST') || request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+        request.method.matches('POST') && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
       EOT
       description                       = "Prevent rate limit abuse"
       conform_action                    = "allow"

@@ -21,3 +21,10 @@ You can refer to the following image created by [Priyanka Vergadia](https://blog
 
 ![image](https://github.com/GangGreenTemperTatum/gcp-cloud-armor-lab/assets/104169244/c8b6ee0e-d4cf-4c4d-be40-9d5718fa5f67)
 
+## Recommended WAF Testing Frameworks
+
+1. [Wallarm](https://github.com/wallarm/gotestwaf)
+2. [SignalSci](https://github.com/signalsciences/waf-testing-framework)
+3. [Fastly](https://github.com/fastly/ftw)
+4. [F5](https://github.com/f5devcentral/f5-waf-tester)
+

@@ -16,3 +16,8 @@
 - [Rate limiting overview](https://cloud.google.com/armor/docs/rate-limiting-overview)
 
 ![image](https://github.com/GangGreenTemperTatum/gcp-cloud-armor-lab/assets/104169244/c3f2643a-9f13-4237-8c50-22c43d95d0ce)
+
+You can refer to the following image created by [Priyanka Vergadia](https://blog.searce.com/cloud-armor-securing-google-infrastructure-against-web-attacks-8fb335174978) (credit)
+
+![image](https://github.com/GangGreenTemperTatum/gcp-cloud-armor-lab/assets/104169244/c8b6ee0e-d4cf-4c4d-be40-9d5718fa5f67)
+

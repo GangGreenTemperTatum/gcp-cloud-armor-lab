@@ -210,7 +210,7 @@ variable "crawler_osint_rules" {
     def_rule = {
       action      = "deny(404)"
       priority    = "4003"
-      expression  = "request.path.contains('admin') || request.path.contains('robots')"
+      expression  = "request.path.contains('admin') || request.path.contains('robots') || request.path.contains('wp-admin') || request.path.contains('wordpress') || request.path.contains('.wp') || request.path.contains('.php') || request.path.endsWith('.wp')"
       description = "Stop malicious crawling/OSINT activity"
       preview     = false
     }

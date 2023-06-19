@@ -299,17 +299,23 @@ variable "owasp_rules" {
       expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#cross-site_scripting_xss
-    rule_xss = {
-      action      = "deny(403)"
-      priority    = "1001"
-      description = "Cross-site scripting"
-      preview     = true
+rule_xss = {
+      action                  = "deny(404)"
+      priority                = "1001"
+      description             = "Cross-site scripting"
+      preview                 = true
+      target_rule_set         = "xss-v33-stable"
+      sensitivity_level       = 1
+      exclude_target_rule_ids = [""]
+
+      ### Include all signatures at paranoia level 1
+      #expression = "evaluatePreconfiguredWaf('xss-v33-stable', {'sensitivity': 1})"
 
       ### Detect Level 1
-      #expression  = "evaluatePreconfiguredExpr('xss-stable',['owasp-crs-v030001-id941150-xss','owasp-crs-v030001-id941320-xss','owasp-crs-v030001-id941330-xss','owasp-crs-v030001-id941340-xss'])"
+      #expression = "evaluatePreconfiguredExpr('xss-stable',['owasp-crs-v030001-id941150-xss','owasp-crs-v030001-id941320-xss','owasp-crs-v030001-id941330-xss','owasp-crs-v030001-id941340-xss'])"
 
       ### Detect Level 1 & 2
-      expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
+      #expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#local_file_inclusion_lfi
     rule_lfi = {

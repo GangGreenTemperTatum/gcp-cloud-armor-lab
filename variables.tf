@@ -553,6 +553,30 @@ variable "http_method_protect_rule_block" {
   )
 }
 
+# ---------------------------------
+# Custom gRPC rule
+# ---------------------------------
+
+variable "backend_grpc_rule" {
+  default = {
+    def_rule = {
+      action      = "deny(404)"
+      priority    = "1012"
+      expression  = "request.method.contains('PROP')"
+      description = "Stop Malicious gRPC Requests"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
 # --------------------------------- 
 # Custom GCP-Driven CVE & Log4j rules
 # --------------------------------- 

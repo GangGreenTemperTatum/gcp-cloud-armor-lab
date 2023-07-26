@@ -280,14 +280,14 @@ variable "banned_countries" {
 variable "owasp_rules" {
   default = {
     #https://cloud.google.com/armor/docs/rule-tuning#sql_injection_sqli
-    rule_sqli = {
-      action      = "deny(403)"
-      priority    = "1000"
-      description = "SQL injection"
+    rule_sqli_p1 = {
+      action      = "deny(404)"
+      priority    = "1001"
+      description = "iSQL paranoia level 1"
       preview     = true
 
       ### Detect Level 1
-      #expression  = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942110-sqli','owasp-crs-v030001-id942120-sqli','owasp-crs-v030001-id942150-sqli','owasp-crs-v030001-id942180-sqli','owasp-crs-v030001-id942200-sqli','owasp-crs-v030001-id942210-sqli','owasp-crs-v030001-id942260-sqli','owasp-crs-v030001-id942300-sqli','owasp-crs-v030001-id942310-sqli','owasp-crs-v030001-id942330-sqli','owasp-crs-v030001-id942340-sqli','owasp-crs-v030001-id942380-sqli','owasp-crs-v030001-id942390-sqli','owasp-crs-v030001-id942400-sqli','owasp-crs-v030001-id942410-sqli','owasp-crs-v030001-id942430-sqli','owasp-crs-v030001-id942440-sqli','owasp-crs-v030001-id942450-sqli','owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
+      expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942110-sqli','owasp-crs-v030001-id942120-sqli','owasp-crs-v030001-id942150-sqli','owasp-crs-v030001-id942180-sqli','owasp-crs-v030001-id942200-sqli','owasp-crs-v030001-id942210-sqli','owasp-crs-v030001-id942260-sqli','owasp-crs-v030001-id942300-sqli','owasp-crs-v030001-id942310-sqli','owasp-crs-v030001-id942330-sqli','owasp-crs-v030001-id942340-sqli','owasp-crs-v030001-id942380-sqli','owasp-crs-v030001-id942390-sqli','owasp-crs-v030001-id942400-sqli','owasp-crs-v030001-id942410-sqli','owasp-crs-v030001-id942430-sqli','owasp-crs-v030001-id942440-sqli','owasp-crs-v030001-id942450-sqli','owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
 
       ### Detect Level 1 & 2
       #expression  = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
@@ -296,31 +296,76 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
 
       ### Detect Level 1,2,3 & 4
-      expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
+      #expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
+    }
+    rule_sqli_p2 = {
+      action      = "deny(404)"
+      priority    = "1002"
+      description = "iSQL paranoia level 1 2"
+      preview     = true
+
+      ### Detect Level 1
+      #expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942110-sqli','owasp-crs-v030001-id942120-sqli','owasp-crs-v030001-id942150-sqli','owasp-crs-v030001-id942180-sqli','owasp-crs-v030001-id942200-sqli','owasp-crs-v030001-id942210-sqli','owasp-crs-v030001-id942260-sqli','owasp-crs-v030001-id942300-sqli','owasp-crs-v030001-id942310-sqli','owasp-crs-v030001-id942330-sqli','owasp-crs-v030001-id942340-sqli','owasp-crs-v030001-id942380-sqli','owasp-crs-v030001-id942390-sqli','owasp-crs-v030001-id942400-sqli','owasp-crs-v030001-id942410-sqli','owasp-crs-v030001-id942430-sqli','owasp-crs-v030001-id942440-sqli','owasp-crs-v030001-id942450-sqli','owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
+
+      ### Detect Level 1 & 2
+      expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
+
+      ### Detect Level 1,2 & 3
+      #expression  = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
+
+      ### Detect Level 1,2,3 & 4
+      #expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
+    }
+    rule_sqli_p3 = {
+      action      = "deny(404)"
+      priority    = "1003"
+      description = "iSQL paranoia level 3"
+      preview     = true
+
+      ### Detect Level 1
+      #expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942110-sqli','owasp-crs-v030001-id942120-sqli','owasp-crs-v030001-id942150-sqli','owasp-crs-v030001-id942180-sqli','owasp-crs-v030001-id942200-sqli','owasp-crs-v030001-id942210-sqli','owasp-crs-v030001-id942260-sqli','owasp-crs-v030001-id942300-sqli','owasp-crs-v030001-id942310-sqli','owasp-crs-v030001-id942330-sqli','owasp-crs-v030001-id942340-sqli','owasp-crs-v030001-id942380-sqli','owasp-crs-v030001-id942390-sqli','owasp-crs-v030001-id942400-sqli','owasp-crs-v030001-id942410-sqli','owasp-crs-v030001-id942430-sqli','owasp-crs-v030001-id942440-sqli','owasp-crs-v030001-id942450-sqli','owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
+
+      ### Detect Level 1 & 2
+      #expression  = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
+
+      ### Detect Level 1,2 & 3
+      expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
+
+      ### Detect Level 1,2,3 & 4
+      #expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
     }
     #https://cloud.google.com/armor/docs/rule-tuning#cross-site_scripting_xss
-rule_xss = {
-      action                  = "deny(404)"
-      priority                = "1001"
-      description             = "Cross-site scripting"
-      preview                 = true
-      target_rule_set         = "xss-v33-stable"
-      sensitivity_level       = 1
-      exclude_target_rule_ids = [""]
 
-      ### Include all signatures at paranoia level 1
-      #expression = "evaluatePreconfiguredWaf('xss-v33-stable', {'sensitivity': 1})"
+    rule_xss_paranoia_one = {
+      action      = "deny(404)"
+      priority    = "1010"
+      description = "Cross-site scripting paranoia level 1"
+      preview     = true
+
+      ### Detect Level 1
+      expression = "evaluatePreconfiguredExpr('xss-stable',['owasp-crs-v030001-id941150-xss','owasp-crs-v030001-id941320-xss','owasp-crs-v030001-id941330-xss','owasp-crs-v030001-id941340-xss'])"
+
+      ### Detect Level 1 & 2
+      #expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
+    }
+
+    rule_xss_paranoia_two = {
+      action      = "deny(404)"
+      priority    = "1011"
+      description = "Cross-site scripting paranoia level 2"
+      preview     = true
 
       ### Detect Level 1
       #expression = "evaluatePreconfiguredExpr('xss-stable',['owasp-crs-v030001-id941150-xss','owasp-crs-v030001-id941320-xss','owasp-crs-v030001-id941330-xss','owasp-crs-v030001-id941340-xss'])"
 
       ### Detect Level 1 & 2
-      #expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
+      expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
     }
+
     #https://cloud.google.com/armor/docs/rule-tuning#local_file_inclusion_lfi
     rule_lfi = {
       action      = "deny(403)"
-      priority    = "1002"
+      priority    = "1020"
       description = "Local file inclusion"
       preview     = true
 
@@ -330,7 +375,7 @@ rule_xss = {
     #https://cloud.google.com/armor/docs/rule-tuning#remote_code_execution_rce
     rule_rce = {
       action      = "deny(403)"
-      priority    = "1003"
+      priority    = "1030"
       description = "Remote code execution"
       preview     = true
 
@@ -340,7 +385,7 @@ rule_xss = {
     #https://cloud.google.com/armor/docs/rule-tuning#remote_file_inclusion_rfi
     rule_rfi = {
       action      = "deny(403)"
-      priority    = "1004"
+      priority    = "1040"
       description = "Remote file inclusion"
       preview     = true
 
@@ -353,7 +398,7 @@ rule_xss = {
     #https://cloud.google.com/armor/docs/rule-tuning#method_enforcement
     rule_methodenforcement = {
       action      = "deny(403)"
-      priority    = "1005"
+      priority    = "1050"
       description = "Method enforcement"
       preview     = true
 
@@ -363,7 +408,7 @@ rule_xss = {
     #https://cloud.google.com/armor/docs/rule-tuning#scanner_detection
     rule_scandetection = {
       action      = "deny(403)"
-      priority    = "1006"
+      priority    = "1060"
       description = "Scanner detection"
       preview     = true
 
@@ -376,7 +421,7 @@ rule_xss = {
     #https://cloud.google.com/armor/docs/rule-tuning#protocol_attack
     rule_protocolattack = {
       action      = "deny(403)"
-      priority    = "1007"
+      priority    = "1070"
       description = "Protocol Attack"
       preview     = true
 
@@ -392,7 +437,7 @@ rule_xss = {
     #https://cloud.google.com/armor/docs/rule-tuning#php
     rule_php = {
       action      = "deny(403)"
-      priority    = "1008"
+      priority    = "1080"
       description = "PHP Injection Attack"
       preview     = true
 
@@ -408,7 +453,7 @@ rule_xss = {
     #https://cloud.google.com/armor/docs/rule-tuning#session_fixation
     rule_sessionfixation = {
       action      = "deny(403)"
-      priority    = "1009"
+      priority    = "1090"
       description = "Session Fixation Attack"
       preview     = true
 
@@ -417,7 +462,7 @@ rule_xss = {
     }
     rule_java = {
       action      = "deny(403)"
-      priority    = "1010"
+      priority    = "1100"
       description = "Java Attack"
       preview     = true
 
@@ -426,7 +471,7 @@ rule_xss = {
     }
     rule_nodejs = {
       action      = "deny(403)"
-      priority    = "1011"
+      priority    = "1111"
       description = "NodeJS Attack"
       preview     = true
 
@@ -444,6 +489,69 @@ rule_xss = {
   )
 }
 
+# ---------------------------------
+# Manual HTTP Method Enforcements
+# ---------------------------------
+
+variable "http_method_protect_rule" {
+  default = {
+    def_rule = {
+      action      = "allow"
+      priority    = "1047"
+      expression  = "request.method=='GET' || request.method=='HEAD' || request.method=='POST' || request.method=='PUT' || request.method=='DELETE'"
+      description = "Protect HTTP Methods"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "http_method_protect_rule_ext" {
+  default = {
+    def_rule = {
+      action      = "allow"
+      priority    = "1048"
+      expression  = "request.method=='CONNECT' || request.method=='OPTIONS' || request.method=='TRACE' || request.method=='PATCH'"
+      description = "Protect HTTP Methods"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "http_method_protect_rule_block" {
+  default = {
+    def_rule = {
+      action      = "deny(404)"
+      priority    = "1049"
+      expression  = "request.method.matches('.*')"
+      description = "Block non-conforming HTTP Methods"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
 
 # --------------------------------- 
 # Custom GCP-Driven CVE & Log4j rules

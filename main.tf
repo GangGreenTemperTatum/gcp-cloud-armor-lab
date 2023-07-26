@@ -345,6 +345,54 @@ resource "google_compute_security_policy" "security-policy-1" {
     }
   }
 
+  # ---------------------------------
+  # Manual HTTP Method Enforcements
+  # ---------------------------------
+  dynamic "rule" {
+    for_each = var.http_method_protect_rule
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.http_method_protect_rule_ext
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.http_method_protect_rule_block
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
   # --------------------------------- 
   # Custom Log4j rule
   # --------------------------------- 

@@ -206,6 +206,36 @@ resource "google_compute_security_policy" "security-policy-1" {
       }
     }
   }
+  # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_security_policy
+
+  dynamic "rule" {
+    for_each = var.throttle_rules_ban_endpoints
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
   dynamic "rule" {
     for_each = var.throttle_rules_auth
     content {

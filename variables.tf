@@ -530,6 +530,8 @@ variable "owasp_rules" {
 # ---------------------------------
 # Manual HTTP Method Enforcements
 # ---------------------------------
+# NFR submitted with GCP who do not support enforcing HTTP Version
+# `evaluatePreconfiguredExpr('methodenforcement-v33-stable')` OWASP CRS rule is too prone to many false positives and risky, even with Paranoia Level 1
 
 variable "http_method_protect_rule" {
   default = {

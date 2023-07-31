@@ -101,7 +101,7 @@ variable "throttle_rules_endpoints" {
       #ban_http_request_count            = 10000
       #ban_http_request_interval_sec     = 600
       #ban_duration_sec                  = 120
-      preview = true
+      preview = false
     }
   }
   type = map(object({
@@ -114,6 +114,44 @@ variable "throttle_rules_endpoints" {
     enforce_on_key                    = string
     rate_limit_threshold_count        = number
     rate_limit_threshold_interval_sec = number
+    preview                           = bool
+    })
+  )
+}
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_security_policy
+variable "throttle_rules_ban_endpoints" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "3999"
+      expression                        = <<-EOT
+        request.method.matches('POST') && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+      EOT
+      description                       = "Ban rate limit abuse"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "5"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 300 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = "10"
+      ban_threshold_interval_sec        = "30"
+      preview                           = true
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
     preview                           = bool
     })
   )

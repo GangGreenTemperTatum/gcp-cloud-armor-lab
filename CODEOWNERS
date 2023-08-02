@@ -1,4 +1,18 @@
-## Wildcard all - WIP
-# @GangGreenTemperTatum/<team-name>
+## All other infrastructure:
+@GangGreenTemperTatum
 
-*   @GangGreenTemperTatum
+## Shared infrastructure:
+
+## Specific to CODEOWNERS:
+CODEOWNERS @GangGreenTemperTatum
+
+# Security-specific infrastructure:
+/armor.tf @GangGreenTemperTatum
+/variables.tf @GangGreenTemperTatum
+
+## GCP SCC | Security Command Center:
+
+# IAM and Permissions
+## TF runner SA, Workload ID and APIs:
+
+## JIT:

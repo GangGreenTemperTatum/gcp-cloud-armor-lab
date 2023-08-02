@@ -89,7 +89,7 @@ variable "throttle_rules_ban_endpoints" {
   default = {
     def_rule = {
       action                            = "rate_based_ban"
-      priority                          = "3999"
+      priority                          = "400"
       expression                        = <<-EOT
         request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
       EOT
@@ -127,7 +127,7 @@ variable "throttle_rules_endpoints_post" {
   default = {
     def_rule = {
       action                            = "throttle"
-      priority                          = "4000"
+      priority                          = "401"
       expression                        = <<-EOT
         request.method.matches('POST') || && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
       EOT
@@ -161,7 +161,7 @@ variable "throttle_rules_endpoints_options" {
   default = {
     def_rule = {
       action                            = "throttle"
-      priority                          = "4001"
+      priority                          = "402"
       expression                        = <<-EOT
         request.method.matches('OPTIONS') || && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
       EOT
@@ -195,7 +195,7 @@ variable "throttle_rules_auth" {
   default = {
     def_rule = {
       action                            = "throttle"
-      priority                          = "4001"
+      priority                          = "403"
       expression                        = "request.path.contains('auth')"
       description                       = "Prevent Brute Force and Creds Stuffing Attacks"
       conform_action                    = "allow"
@@ -224,7 +224,7 @@ variable "throttle_rules" {
   default = {
     def_rule = {
       action                            = "throttle"
-      priority                          = "4002"
+      priority                          = "404"
       versioned_expr                    = "SRC_IPS_V1"
       src_ip_ranges                     = ["103.235.111.255/32"]
       description                       = "Throttling traffic generic rule placeholder random IP from Wallis and Futuna"

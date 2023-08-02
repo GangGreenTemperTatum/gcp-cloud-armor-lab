@@ -134,8 +134,8 @@ variable "throttle_rules_ban_endpoints" {
       rate_limit_threshold_count        = "5"
       rate_limit_threshold_interval_sec = "10"
       ban_duration_sec                  = 300 # Terraform docs are incorrect and this is mandatory
-      ban_threshold_count               = "10"
-      ban_threshold_interval_sec        = "30"
+      ban_threshold_count               = 10
+      ban_threshold_interval_sec        = 60
       preview                           = true
     }
   }

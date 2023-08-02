@@ -81,51 +81,17 @@ variable "default_rules_2" {
   )
 }
 
-# --------------------------------- 
+# ---------------------------------
 # Throttling traffic rules
-# --------------------------------- 
-variable "throttle_rules_endpoints" {
-  default = {
-    def_rule = {
-      action                            = "throttle"
-      priority                          = "4000"
-      expression                        = <<-EOT
-        request.method.matches('POST') && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
-      EOT
-      description                       = "Prevent rate limit abuse"
-      conform_action                    = "allow"
-      exceed_action                     = "deny(429)"
-      enforce_on_key                    = "IP"
-      rate_limit_threshold_count        = "50"
-      rate_limit_threshold_interval_sec = "10"
-      #ban_http_request_count            = 10000
-      #ban_http_request_interval_sec     = 600
-      #ban_duration_sec                  = 120
-      preview = false
-    }
-  }
-  type = map(object({
-    action                            = string
-    priority                          = string
-    expression                        = string
-    description                       = string
-    conform_action                    = string
-    exceed_action                     = string
-    enforce_on_key                    = string
-    rate_limit_threshold_count        = number
-    rate_limit_threshold_interval_sec = number
-    preview                           = bool
-    })
-  )
-}
-# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_security_policy
+# ---------------------------------
+
 variable "throttle_rules_ban_endpoints" {
   default = {
     def_rule = {
       action                            = "rate_based_ban"
       priority                          = "3999"
       expression                        = <<-EOT
-        request.method.matches('POST') && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+        request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
       EOT
       description                       = "Ban rate limit abuse"
       conform_action                    = "allow"
@@ -156,6 +122,75 @@ variable "throttle_rules_ban_endpoints" {
     })
   )
 }
+
+variable "throttle_rules_endpoints_post" {
+  default = {
+    def_rule = {
+      action                            = "throttle"
+      priority                          = "4000"
+      expression                        = <<-EOT
+        request.method.matches('POST') || && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+      EOT
+      description                       = "Prevent rate limit abuse"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "5"
+      rate_limit_threshold_interval_sec = "10"
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    preview                           = bool
+    })
+  )
+}
+
+# Seperate rule required required as cannot filter on POST and OPTIONS in same rule (`1:1: Matches subexpressions count of 2 exceeded maximum of 1 per expression.`)
+
+variable "throttle_rules_endpoints_options" {
+  default = {
+    def_rule = {
+      action                            = "throttle"
+      priority                          = "4001"
+      expression                        = <<-EOT
+        request.method.matches('OPTIONS') || && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+      EOT
+      description                       = "Prevent rate limit abuse"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "5"
+      rate_limit_threshold_interval_sec = "10"
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    preview                           = bool
+    })
+  )
+}
+
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_security_policy
+
 variable "throttle_rules_auth" {
   default = {
     def_rule = {

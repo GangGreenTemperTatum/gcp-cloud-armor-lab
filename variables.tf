@@ -129,7 +129,7 @@ variable "throttle_rules_endpoints_post" {
       action                            = "throttle"
       priority                          = "401"
       expression                        = <<-EOT
-        request.method.matches('POST') || && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+        request.method.matches('POST') && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
       EOT
       description                       = "Prevent rate limit abuse"
       conform_action                    = "allow"
@@ -163,7 +163,7 @@ variable "throttle_rules_endpoints_options" {
       action                            = "throttle"
       priority                          = "402"
       expression                        = <<-EOT
-        request.method.matches('OPTIONS') || && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
+        request.method.matches('OPTIONS') && request.path.contains('RegisterWithEmail') || request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset')
       EOT
       description                       = "Prevent rate limit abuse"
       conform_action                    = "allow"

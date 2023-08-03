@@ -156,6 +156,7 @@ variable "throttle_rules_endpoints_post" {
 }
 
 # Seperate rule required required as cannot filter on POST and OPTIONS in same rule (`1:1: Matches subexpressions count of 2 exceeded maximum of 1 per expression.`)
+# https://issuetracker.google.com/issues/294324800?pli=1
 
 variable "throttle_rules_endpoints_options" {
   default = {

@@ -197,7 +197,7 @@ variable "throttle_rules_auth" {
     def_rule = {
       action                            = "throttle"
       priority                          = "403"
-      expression                        = "request.path.contains('auth')"
+      expression                        = "request.method.matches('POST') && request.path.endsWith('/Auth')"
       description                       = "Prevent Brute Force and Creds Stuffing Attacks"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"

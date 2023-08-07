@@ -330,6 +330,21 @@ resource "google_compute_security_policy" "security-policy-1" {
     }
   }
 
+  dynamic "rule" {
+    for_each = var.gpt_crawler_rules
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
   # --------------------------------- 
   # Scanners, Crawlers and Malicious Recon/OSINT
   # --------------------------------- 

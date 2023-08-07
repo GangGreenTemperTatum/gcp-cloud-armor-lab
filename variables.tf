@@ -276,6 +276,28 @@ variable "bot_captcha_rules" {
   )
 }
 
+# https://platform.openai.com/docs/gptbot
+
+variable "gpt_crawler_rules" {
+  default = {
+    def_rule = {
+      action      = "deny(404)"
+      priority    = "201"
+      expression  = "has(request.headers['user-agent']) && request.headers['user-agent'].contains('GPTBot')"
+      description = "Detect GPTBot crawling and activity"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
 # --------------------------------- 
 # Scanners, Crawlers and Malicious Recon/OSINT
 # --------------------------------- 

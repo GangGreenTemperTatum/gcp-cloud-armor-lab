@@ -584,6 +584,31 @@ variable "owasp_rules" {
   )
 }
 
+# ------------------------------------------------------------------------------
+# Custom OWASP CRS Modsec Hacks
+# Defined outside of the Dynamic rule block, for when OWASP CRS defaults are too sensitive, regardless of paranoia levels
+# ------------------------------------------------------------------------------
+
+variable "xss_based_script_requesturls" {
+  default = {
+    def_rule = {
+      action      = "deny(404)"
+      priority    = "1009"
+      expression  = "request.path.matches('(?i:script)') || request.path.contains('script')"
+      description = "Malicious XSS <script> tags in RequestURLs"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
 # ---------------------------------
 # Manual HTTP Method Enforcements
 # ---------------------------------

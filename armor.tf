@@ -417,6 +417,26 @@ resource "google_compute_security_policy" "security-policy-1" {
     }
   }
 
+  # ---------------------------------------------------
+  # Custom OWASP CRS Modsec Hacks 
+  # Defined outside of the Dynamic rule block, for when OWASP CRS defaults are too sensitive, regardless of paranoia levels
+  # ---------------------------------------------------
+
+  dynamic "rule" {
+    for_each = var.xss_based_script_requesturls
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
   # ---------------------------------
   # Manual HTTP Method Enforcements
   # ---------------------------------

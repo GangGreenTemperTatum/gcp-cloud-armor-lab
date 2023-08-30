@@ -382,6 +382,31 @@ resource "google_compute_security_policy" "security-policy-1" {
   }
 
   # ---------------------------------
+  # Platform Abuse
+  # ---------------------------------
+
+  dynamic "rule" {
+    for_each = var.banned_ips
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  # ---------------------------------
+  # Vendor Whitelisting Rules
+  # ---------------------------------
+
+
+
+  # ---------------------------------
   # Banned Countries - I.E OFAC & Global Affairs
   # ---------------------------------
   dynamic "rule" {

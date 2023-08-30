@@ -344,6 +344,31 @@ variable "countries_rules" {
 }
 
 # ---------------------------------
+# Platform Abuse 
+# ---------------------------------
+/*
+variable "banned_ips" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "50"
+      expression  = "inIpRange(origin.ip, '1.1.1.1/32') || inIpRange(origin.ip, '2.2.2.2/32') || inIpRange(origin.ip, '3.3.3.3/32')"
+      description = "Explicit Blocklist Bad IPs"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+*/
+
+# ---------------------------------
 # Banned Countries - I.E OFAC & Global Affairs
 # Country Codes - https://wits.worldbank.org/wits/wits/witshelp/content/codes/country_codes.htm
 # ---------------------------------

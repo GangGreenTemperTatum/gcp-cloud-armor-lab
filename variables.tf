@@ -324,7 +324,7 @@ variable "gpt_crawler_rules" {
     def_rule = {
       action      = "deny(502)"
       priority    = "201"
-      expression  = "has(request.headers['user-agent']) && request.headers['user-agent'].contains('GPTBot') || has(request.headers['User-Agent']) && request.headers['User-Agent'].matches('(?i:gptbot)')"
+      expression  = "has(request.headers['user-agent']) && request.headers['user-agent'].contains('GPTBot') || has(request.headers['User-Agent']) && (request.headers['User-Agent'].matches('(?i:gptbot)'))"
       preview     = true
     }
   }

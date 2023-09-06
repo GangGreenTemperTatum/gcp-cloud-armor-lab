@@ -256,14 +256,55 @@ variable "throttle_rules" {
 # --------------------------------- 
 # Bot Detection & Captcha rules
 # --------------------------------- 
+
+variable "ec2_bot_blocking" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "449"
+      expression  = "request.path.contains('Signup') && (origin.asn == 16509 || origin.asn == 15169 || origin.asn == 14061)"
+      description = "Deny Bots or Malicious Signups from EC2 GCP, DigitalOcean and AWS ASNs"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
 variable "bot_captcha_rules" {
   default = {
     def_rule = {
-      action      = "deny(404)"
-      priority    = "4002"
+      action      = "deny(502)"
+      priority    = "450"
       expression  = "(token.recaptcha_session.valid) && (token.recaptcha_action.valid)"
       description = "Deny Bots from ReCaptcha Session Tokens"
       preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "ec2_bot_monitoring" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "451"
+      expression  = "(origin.asn == 16509 || origin.asn == 15169 || origin.asn == 14061)"
+      description = "Monitor Bots or Malicious Scripts from EC2 GCP, DigitalOcean and AWS ASNs"
+      preview     = true
     }
   }
   type = map(object({
@@ -281,7 +322,7 @@ variable "bot_captcha_rules" {
 variable "gpt_crawler_rules" {
   default = {
     def_rule = {
-      action      = "deny(404)"
+      action      = "deny(502)"
       priority    = "201"
       expression  = "has(request.headers['user-agent']) && request.headers['user-agent'].contains('GPTBot') || has(request.headers['User-Agent']) && request.headers['User-Agent'].matches('(?i:gptbot)')"
       preview     = true

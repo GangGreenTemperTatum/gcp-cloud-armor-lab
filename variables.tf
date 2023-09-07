@@ -262,7 +262,7 @@ variable "ec2_bot_blocking" {
     def_rule = {
       action      = "deny(502)"
       priority    = "449"
-      expression  = "request.path.contains('Signup') && (origin.asn == 16509 || origin.asn == 15169 || origin.asn == 14061)"
+      expression  = "request.method.matches('POST') && request.path.contains('Signup') && (origin.asn == 16509 || origin.asn == 396982 || origin.asn == 14061)"
       description = "Deny Bots or Malicious Signups from EC2 GCP, DigitalOcean and AWS ASNs"
       preview     = true
     }

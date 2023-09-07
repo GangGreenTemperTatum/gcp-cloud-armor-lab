@@ -282,8 +282,8 @@ variable "bot_captcha_rules" {
     def_rule = {
       action      = "deny(502)"
       priority    = "450"
-      expression  = "(token.recaptcha_session.valid) && (token.recaptcha_action.valid)"
-      description = "Deny Bots from ReCaptcha Session Tokens"
+      expression  = "request.path.contains('Signup') && (token.recaptcha_session.valid) && (token.recaptcha_action.valid)"
+      description = "Deny Bots from ReCaptcha Session Tokens Against Account Signup via Enterprise Tokens"
       preview     = false
     }
   }

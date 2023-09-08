@@ -277,14 +277,15 @@ variable "ec2_bot_blocking" {
   )
 }
 
-variable "bot_captcha_rules" {
+variable "bot_captcha_action_token_allow" {
   default = {
     def_rule = {
-      action      = "deny(502)"
-      priority    = "450"
-      expression  = "request.path.contains('Signup') && (token.recaptcha_session.valid) && (token.recaptcha_action.valid)"
-      description = "Deny Bots from ReCaptcha Session Tokens Against Account Signup via Enterprise Tokens"
-      preview     = false
+      action                = "allow"
+      priority              = "450"
+      expression            = "request.path.endsWith('Signup') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
+      description           = "Allow reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations and requires explicit Action Name"
+      recaptcha_action_name = "signup"
+      preview               = true
     }
   }
   type = map(object({
@@ -297,6 +298,71 @@ variable "bot_captcha_rules" {
   )
 }
 
+variable "bot_captcha_action_token_deny" {
+  default = {
+    def_rule = {
+      action      = "deny(403)"
+      priority    = "451"
+      expression  = "request.path.endsWith('Signup') && token.recaptcha_action.score < 0.8 && (token.recaptcha_action.valid)"
+      description = "Explicit Deny reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations as well as incorrect Action Name"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+### Not creating challenge ReCaptcha Enterprise keys at this time ###
+/*
+variable "bot_captcha_action_token_challenge" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "450"
+      expression  = "request.path.endsWith('Signup') && token.recaptcha_action.score == 0.5 && (token.recaptcha_action.valid)"
+      description = "Challenge reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations"
+      preview     = true
+      recaptcha_action_name = "signup"
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+*/
+/*
+variable "bot_captcha_session_token" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "459"
+      expression  = "request.path.endsWith('Signup') && token.recaptcha_session.score >= 0.8 && (token.recaptcha_action.valid)"
+      description = "PLACEHOLDER - Deny reCAPTCHA Enterprise session-token with a score no less than 0.8 to account creations"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+*/
+/*
 variable "ec2_bot_monitoring" {
   default = {
     def_rule = {
@@ -316,7 +382,7 @@ variable "ec2_bot_monitoring" {
     })
   )
 }
-
+*/
 # https://platform.openai.com/docs/gptbot
 
 variable "gpt_crawler_rules" {

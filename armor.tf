@@ -332,7 +332,7 @@ resource "google_compute_security_policy" "security-policy-1" {
   }
 
   dynamic "rule" {
-    for_each = var.bot_captcha_rules
+    for_each = var.bot_captcha_action_token_allow
     content {
       action      = rule.value.action
       priority    = rule.value.priority
@@ -347,7 +347,7 @@ resource "google_compute_security_policy" "security-policy-1" {
   }
 
   dynamic "rule" {
-    for_each = var.ec2_bot_monitoring
+    for_each = var.bot_captcha_action_token_deny
     content {
       action      = rule.value.action
       priority    = rule.value.priority
@@ -361,6 +361,54 @@ resource "google_compute_security_policy" "security-policy-1" {
     }
   }
 
+  /*
+  dynamic "rule" {
+    for_each = var.bot_captcha_action_token_challenge
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.bot_captcha_session_token
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+*/
+
+/*
+  dynamic "rule" {
+    for_each = var.ec2_bot_monitoring
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+*/
   dynamic "rule" {
     for_each = var.gpt_crawler_rules
     content {

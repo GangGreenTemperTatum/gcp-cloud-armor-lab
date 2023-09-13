@@ -540,6 +540,13 @@ variable "malicious_key_creation_contd" {
 
 # The `recaptcha_action_name` is currently supported, I just need to work out how to embed that in `armor.tf` - https://registry.terraform.io/modules/GoogleCloudPlatform/cloud-armor/google/latest?tab=inputs
 
+/*
+Ads gcloud bug raised here - https://cloud.google.com/support/docs/issue-trackers
+# https://issuetracker.google.com/u/1/issues/300157692
+crapi % gcloud beta compute security-policies rules update 396 --security-policy block-with-modsec-crs --description="test" --recaptcha-action-site-keys="x_account_registration_waf"
+ERROR: gcloud crashed (AttributeError): 'NoneType' object has no attribute 'exprOptions'
+*/
+
 variable "bot_captcha_action_token_allow" {
   default = {
     def_rule = {

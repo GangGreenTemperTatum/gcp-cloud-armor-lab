@@ -18,6 +18,32 @@ variable "region" {
   type        = string
 }
 
+variable "layer_7_ddos_defense_enable" {
+  description = "(Optional) If set to true, enables CAAP for L7 DDoS detection"
+  type        = bool
+  default     = false
+}
+
+/*
+variable "threat_intelligence_rules" {
+  description = "Map of Threat Intelligence Feed rules"
+  type        = map(any)
+  default     = {}
+}
+
+variable "type" {
+  description = "Type indicates the intended use of the security policy. Possible values are CLOUD_ARMOR and CLOUD_ARMOR_EDGE"
+  type        = string
+  default     = "CLOUD_ARMOR"
+}
+
+variable "layer_7_ddos_defense_rule_visibility" {
+  description = "(Optional) Rule visibility can be one of the following: STANDARD - opaque rules. PREMIUM - transparent rules"
+  type        = string
+  default     = "STANDARD"
+}
+*/
+
 # ------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.

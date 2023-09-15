@@ -47,6 +47,7 @@ resource "google_compute_security_policy" "policy" {
     }
   }
 
+*/
   dynamic "adaptive_protection_config" {
     for_each = var.layer_7_ddos_defense_enable == true ? ["adaptive_protection_config"] : []
     content {
@@ -56,6 +57,7 @@ resource "google_compute_security_policy" "policy" {
       }
     }
   }
+*/
 
   # ------------------------deny(404)---------
   # Spam Abuse

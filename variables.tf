@@ -18,13 +18,13 @@ variable "region" {
   type        = string
 }
 
+/*
 variable "layer_7_ddos_defense_enable" {
   description = "(Optional) If set to true, enables CAAP for L7 DDoS detection"
   type        = bool
   default     = false
 }
 
-/*
 variable "threat_intelligence_rules" {
   description = "Map of Threat Intelligence Feed rules"
   type        = map(any)

@@ -47,6 +47,16 @@ resource "google_compute_security_policy" "policy" {
     }
   }
 
+  dynamic "adaptive_protection_config" {
+    for_each = var.layer_7_ddos_defense_enable == true ? ["adaptive_protection_config"] : []
+    content {
+      layer_7_ddos_defense_config {
+        enable          = var.layer_7_ddos_defense_enable
+        rule_visibility = var.layer_7_ddos_defense_rule_visibility
+      }
+    }
+  }
+
   # ------------------------deny(404)---------
   # Spam Abuse
   # ---------------------------------

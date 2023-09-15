@@ -205,7 +205,7 @@ variable "throttle_rules_ban_endpoints_orgabuse" {
       expression                        = <<-EOT
         request.method.matches('POST') && request.path.contains('Signup')
       EOT
-      description                       = "Ban rate limit abuse against Organization creation (Strict)"
+      description                       = "Ban abuse against org create with rate limit >1 in 10 seconds and ban if >1 in 60 seconds (ban overrides rate-limit)"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
@@ -243,7 +243,7 @@ variable "throttle_rules_auth_creds_attacks" {
       expression                        = <<-EOT
         request.method.matches('POST') && request.path.endsWith('API/Auth')
       EOT
-      description                       = "Rate limit logins for credential stuffing and password sprays"
+      description                       = "Ban abuse against invites and password resets with rate limit >4 in 10 seconds and ban if >9 in 60 seconds (ban overrides rate-limit)"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
@@ -281,7 +281,7 @@ variable "throttle_rules_ban_endpoints_post" {
       expression                        = <<-EOT
         request.method.matches('POST') && (request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset'))
       EOT
-      description                       = "Ban rate limit abuse"
+      description                       = "Ban abuse against invites and password resets with rate limit >4 in 10 seconds and ban if >9 in 60 seconds (ban overrides rate-limit)"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
@@ -321,7 +321,7 @@ variable "throttle_rules_ban_endpoints_options" {
       expression                        = <<-EOT
         request.method.matches('OPTIONS') && (request.path.contains('InviteUser') || request.path.contains('RequestPasswordReset'))
       EOT
-      description                       = "Ban rate limit abuse"
+      description                       = "Ban abuse against invites and password resets with rate limit >4 in 10 seconds and ban if >9 in 60 seconds (ban overrides rate-limit)"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
@@ -359,7 +359,7 @@ variable "throttle_rules_ban_api_key_abuse" {
       expression                        = <<-EOT
         request.method.matches('POST') && request.path.endsWith('API/CreateAPIKey')
       EOT
-      description                       = "Ban rate limit abuse against API key creation"
+      description                       = "Ban abuse against API key creation with rate limit >1 in 10 seconds and ban if >2 in 60 seconds (ban overrides rate-limit)Ban rate limit abuse against API key creation"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
@@ -581,7 +581,7 @@ variable "bot_captcha_action_token_allow" {
       expression                        = <<-EOT
         request.path.endsWith('Signup') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)
       EOT
-      description                       = "Allow reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations and requires explicit Action Name"
+      description                       = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
@@ -621,7 +621,7 @@ variable "bot_captcha_action_token_allow" {
       action                = "allow"
       priority              = "397"
       expression            = "request.path.endsWith('Signup') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
-      description           = "Allow reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations and requires explicit Action Name"
+      description           = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
       recaptcha_action_name = "register"
       preview               = true
     }

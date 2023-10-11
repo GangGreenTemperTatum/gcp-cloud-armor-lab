@@ -271,7 +271,7 @@ resource "google_compute_security_policy" "policy" {
       priority    = rule.value.priority
       description = rule.value.description
       preview     = rule.value.preview
-      #actionname  = rule.value.recaptcha_action_name
+      #actionname  = rule.value.recaptcha_action_name # Does not implement here and instead using CEL expression
       match {
         expr {
           expression = rule.value.expression

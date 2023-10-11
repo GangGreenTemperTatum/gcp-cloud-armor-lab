@@ -579,7 +579,7 @@ variable "bot_captcha_action_token_allow" {
       action                            = "rate_based_ban"
       priority                          = "396"
       expression                        = <<-EOT
-        request.path.endsWith('Signup') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)
+        request.path.endsWith('Signup') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid) && (token.recaptcha_action.action.matches('register/signup'))
       EOT
       description                       = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
       conform_action                    = "allow"
@@ -590,7 +590,7 @@ variable "bot_captcha_action_token_allow" {
       ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
       ban_threshold_count               = 2
       ban_threshold_interval_sec        = 60
-      #recaptcha_action_name             = "register"
+      #recaptcha_action_name             = "register" # Does not implement here and instead using CEL expression
       preview                           = true
     }
   }

@@ -782,7 +782,7 @@ variable "bot_captcha_whitelist_staging_dev" {
       action                            = "rate_based_ban"
       priority                          = "389"
       expression                        = <<-EOT
-        (request.path.startsWith('https://staging.myapi.ai/API/v1/signupWith') || request.path.startsWith('https://development.myapi.ai/API/v1/signupWith')) && token.recaptcha_action.score >= 0.2 && token.recaptcha_action.action.contains('signup/')
+        (request.path.startsWith('https://staging.myapi.ai/API/v1/signupWith') || request.path.startsWith('https://development.myapi.ai/API/v1/signupWith')) && request.method=='POST' && token.recaptcha_action.score >= 0.2 && token.recaptcha_action.action.contains('signup/')
       EOT
       description                       = "Whitelist Lower reCAPTCHA Enterprise scores on Stag and Dev for testing"
       conform_action                    = "allow"

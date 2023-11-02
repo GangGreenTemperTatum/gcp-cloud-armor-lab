@@ -11,6 +11,12 @@ resource "google_compute_security_policy" "policy" {
     log_level    = var.log_level
     json_parsing = var.json_parsing
   }
+  adaptive_protection_config {
+    layer_7_ddos_defense_config {
+      enable          = true
+      rule_visibility = "STANDARD"
+    }
+  }
 
   # Reject all traffic that hasn't been whitelisted.
   rule {
@@ -47,7 +53,7 @@ resource "google_compute_security_policy" "policy" {
     }
   }
 
-*/
+  /*
   dynamic "adaptive_protection_config" {
     for_each = var.layer_7_ddos_defense_enable == true ? ["adaptive_protection_config"] : []
     content {
@@ -60,7 +66,7 @@ resource "google_compute_security_policy" "policy" {
 */
 
   # ------------------------deny(404)---------
-  # Spam Abuse
+  # Platform Abuse
   # ---------------------------------
 
   # Leaving commented out for easy quick implementation if required at a later stage by replacing srcip(s)
@@ -86,7 +92,35 @@ resource "google_compute_security_policy" "policy" {
   # Vendor Whitelisting Rules
   # ---------------------------------
 
+  dynamic "rule" {
+    for_each = var.allow_vendor_whitelist_qawolf
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
 
+  dynamic "rule" {
+    for_each = var.allow_vendor_whitelist_qawolf_contd
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
 
   # ---------------------------------
   # Banned Countries - I.E OFAC & Global Affairs
@@ -145,7 +179,7 @@ resource "google_compute_security_policy" "policy" {
   # ---------------------------------
 
   dynamic "rule" {
-    for_each = var.ec2_bot_blocking_register
+    for_each = var.ec2_bot_blocking_signup_google
     content {
       action      = rule.value.action
       priority    = rule.value.priority
@@ -160,7 +194,67 @@ resource "google_compute_security_policy" "policy" {
   }
 
   dynamic "rule" {
-    for_each = var.ec2_bot_blocking_register_contd
+    for_each = var.ec2_bot_blocking_signup_google_contd
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.ec2_bot_blocking_signup_github
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.ec2_bot_blocking_signup_github_contd
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.ec2_bot_blocking_signup_email
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.ec2_bot_blocking_signup_email_contd
     content {
       action      = rule.value.action
       priority    = rule.value.priority
@@ -265,13 +359,13 @@ resource "google_compute_security_policy" "policy" {
   }
 
   dynamic "rule" {
-    for_each = var.bot_captcha_action_token_allow
+    for_each = var.bot_captcha_whitelist_staging_dev
     content {
       action      = rule.value.action
       priority    = rule.value.priority
       description = rule.value.description
       preview     = rule.value.preview
-      #actionname  = rule.value.recaptcha_action_name # Does not implement here and instead using CEL expression
+      #actionname  = rule.value.recaptcha_action_name
       match {
         expr {
           expression = rule.value.expression
@@ -295,7 +389,125 @@ resource "google_compute_security_policy" "policy" {
   }
 
   dynamic "rule" {
-    for_each = var.bot_captcha_action_token_deny
+    for_each = var.bot_captcha_action_token_allow_google
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      #actionname  = rule.value.recaptcha_action_name
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.bot_captcha_action_token_allow_github
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      #actionname  = rule.value.recaptcha_action_name
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = var.bot_captcha_action_token_allow_email
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      #actionname  = rule.value.recaptcha_action_name
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.bot_captcha_action_token_deny_google
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.bot_captcha_action_token_deny_github
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = var.bot_captcha_action_token_deny_email
     content {
       action      = rule.value.action
       priority    = rule.value.priority
@@ -481,7 +693,65 @@ resource "google_compute_security_policy" "policy" {
   }
 
   dynamic "rule" {
-    for_each = var.throttle_rules_ban_endpoints_orgabuse
+    for_each = var.throttle_rules_ban_endpoints_orgabuse_google
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.throttle_rules_ban_endpoints_orgabuse_github
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.throttle_rules_ban_endpoints_orgabuse_email
     content {
       action      = rule.value.action
       priority    = rule.value.priority
@@ -528,7 +798,7 @@ resource "google_compute_security_policy" "policy" {
   }
 
   # ---------------------------------------------------
-  # Custom OWASP CRS Modsec Hacks - RISK-816 - Ads
+  # Custom OWASP CRS Modsec Hacks 
   # Defined outside of the Dynamic rule block, for when OWASP CRS defaults are too sensitive, regardless of paranoia levels
   # ---------------------------------------------------
 
@@ -602,7 +872,7 @@ resource "google_compute_security_policy" "policy" {
   # Custom gRPC rule
   # ---------------------------------
   dynamic "rule" {
-    for_each = var.app_grpc_rule
+    for_each = var.dory_grpc_rule
     content {
       action      = rule.value.action
       priority    = rule.value.priority

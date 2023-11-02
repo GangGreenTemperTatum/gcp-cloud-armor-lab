@@ -1,7 +1,7 @@
-# ------------------------------------------------------------------------------
+# -----------------------
 # REQUIRED PARAMETERS
 # You must provide a value for each of these parameters.
-# ------------------------------------------------------------------------------
+# -----------------------
 
 variable "environment" {
   description = "The environment this module will run in"
@@ -44,10 +44,10 @@ variable "layer_7_ddos_defense_rule_visibility" {
 }
 */
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
 
 variable "log_level" {
   type        = string
@@ -62,9 +62,10 @@ variable "json_parsing" {
   default     = "STANDARD" #Options are DISABLED or STANDARD
 }
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Default rules
-# ---------------------------------
+# ------------------------------------------------------------------------------
+
 variable "default_rules" {
   default = {
     def_rule = {
@@ -89,9 +90,9 @@ variable "default_rules" {
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_security_policy
 
-# ---------------------------------
-# Spam Abuse - Ads
-# ---------------------------------
+# ------------------------------------------------------------------------------
+# Platform Abuse
+# ------------------------------------------------------------------------------
 
 # Leaving commented out for easy quick implementation if required at a later stage by replacing srcip(s)
 
@@ -117,16 +118,55 @@ variable "banned_ips" {
 }
 */
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Vendor Whitelisting Rules
-# ---------------------------------
+# ------------------------------------------------------------------------------
+
+variable "allow_vendor_whitelist_one" {
+  default = {
+    def_rule = {
+      action      = "allow"
+      priority    = "10"
+      expression  = "inIpRange(origin.ip, '1.1.1.1/32') || inIpRange(origin.ip, '1.1.1.2/32')"
+      description = "Permit IPv4 whitelist"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "allow_vendor_whitelist_two" {
+  default = {
+    def_rule = {
+      action      = "allow"
+      priority    = "11"
+      expression  = "inIpRange(origin.ip, '2.2.2.1/32') || inIpRange(origin.ip, '2.2.2.2/32')"
+      description = "Permit IPv4 whitelist"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
 
 
-
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Banned Countries - I.E OFAC & Global Affairs
 # Follow ISO 3166-1 alpha 2 expressions here - https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-# ---------------------------------
+# ------------------------------------------------------------------------------
 
 variable "banned_countries" {
   default = {
@@ -148,9 +188,10 @@ variable "banned_countries" {
   )
 }
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Scanners, Crawlers and Malicious Recon/OSINT
-# ---------------------------------
+# ------------------------------------------------------------------------------
+
 variable "crawler_osint_rules" {
   default = {
     def_rule = {
@@ -191,19 +232,117 @@ variable "gpt_crawler_rules" {
   )
 }
 
-# ---------------------------------
-# Throttling traffic rules
-# ---------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
+# Throttling & ReCaptcha Enterprise Traffic Rules
+# ---------------------------------------------------------------------------------------------------------------------------
 
-# Replace with reCaptcha + Throttling/Banning (397) following log analysis and confidence to deploy non-preview
+/*
+# ---------------------------------------------------------------------------------------------------------------------------
+# 				PLEASE READ
+# ---------------------------------------------------------------------------------------------------------------------------
 
-variable "throttle_rules_ban_endpoints_orgabuse" {
+- Identified that Terraform resource currently does not support `--recaptcha-action-site-keys` gcloud beta which is required for reCaptcha Enterprise integration via WAF and allows the WAF to validate the client reCaptcha Token is valid to the GCP Enterprise Key (prevents domain spoofing and stolen keys)
+- ReCaptcha Enterprise Action Key lives in X
+- As such, this configuration is currently outside of terraform as an unmanaged resource attribute. To verify:
+
+~ % gcloud config set project X
+Updated property [core/project].
+~ % gcloud beta compute security-policies describe block-with-modsec-crs | grep
+...
+<Expect to see>
+...
+"exprOptions" -A 6
+    exprOptions:
+      recaptchaOptions:
+        actionTokenSiteKeys:
+        - <recaptcha-enterprise-key-val>
+
+https://issuetracker.google.com/u/0/issues/300157692?pli=1
+*/
+
+variable "throttle_rules_ban_endpoints_orgabuse_google" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "396"
+      expression                        = <<-EOT
+        request.method.matches('POST') && request.path.contains('/signupWithGoogle')
+      EOT
+      description                       = "Ban abuse against org create with rate limit >1 in 10 seconds and ban if >1 in 60 seconds (ban overrides rate-limit)"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "2"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 2
+      ban_threshold_interval_sec        = 60
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
+variable "throttle_rules_ban_endpoints_orgabuse_github" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "397"
+      expression                        = <<-EOT
+        request.method.matches('POST') && request.path.contains('signupWithGithub')
+      EOT
+      description                       = "Ban abuse against org create with rate limit >1 in 10 seconds and ban if >1 in 60 seconds (ban overrides rate-limit)"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "2"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 2
+      ban_threshold_interval_sec        = 60
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
+variable "throttle_rules_ban_endpoints_orgabuse_email" {
   default = {
     def_rule = {
       action                            = "rate_based_ban"
       priority                          = "398"
       expression                        = <<-EOT
-        request.method.matches('POST') && request.path.contains('Signup')
+        request.method.matches('POST') && request.path.contains('signupWithEmail')
       EOT
       description                       = "Ban abuse against org create with rate limit >1 in 10 seconds and ban if >1 in 60 seconds (ban overrides rate-limit)"
       conform_action                    = "allow"
@@ -241,7 +380,7 @@ variable "throttle_rules_auth_creds_attacks" {
       action                            = "rate_based_ban"
       priority                          = "399"
       expression                        = <<-EOT
-        request.method.matches('POST') && request.path.endsWith('API/Auth')
+        request.method.matches('POST') && request.path.endsWith('API/v1/Auth')
       EOT
       description                       = "Ban abuse against invites and password resets with rate limit >4 in 10 seconds and ban if >9 in 60 seconds (ban overrides rate-limit)"
       conform_action                    = "allow"
@@ -357,9 +496,9 @@ variable "throttle_rules_ban_api_key_abuse" {
       action                            = "rate_based_ban"
       priority                          = "403"
       expression                        = <<-EOT
-        request.method.matches('POST') && request.path.endsWith('API/CreateAPIKey')
+        request.method.matches('POST') && request.path.endsWith('API/v1/CreateAPIKey')
       EOT
-      description                       = "Ban abuse against API key creation with rate limit >1 in 10 seconds and ban if >2 in 60 seconds (ban overrides rate-limit)Ban rate limit abuse against API key creation"
+      description                       = "Ban abuse against API key creation with rate limit >1 in 10 seconds and ban if >2 in 60 seconds (ban overrides rate-limit)"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
@@ -389,20 +528,20 @@ variable "throttle_rules_ban_api_key_abuse" {
   )
 }
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Bot Detection & Captcha rules
-# ---------------------------------
+# ------------------------------------------------------------------------------
 
 # Suspicious ASN's:
 # https://cleantalk.org/blacklists/asn
 # Blocked countries should be enforced via explicit geo-region blocking above
 
-variable "ec2_bot_blocking_register" {
+variable "ec2_bot_blocking_signup_google" {
   default = {
     def_rule = {
       action      = "deny(502)"
       priority    = "442"
-      expression  = "request.method.matches('POST') && request.path.contains('Signup') && (origin.asn == 16509 || origin.asn == 14618 || origin.asn == 396982)"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithGoogle') && (origin.asn == 16509 || origin.asn == 14618 || origin.asn == 396982)"
       description = "Deny Account Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean ASNs"
       preview     = false
     }
@@ -417,13 +556,93 @@ variable "ec2_bot_blocking_register" {
   )
 }
 
-variable "ec2_bot_blocking_register_contd" {
+variable "ec2_bot_blocking_signup_google_contd" {
   default = {
     def_rule = {
       action      = "deny(502)"
       priority    = "443"
-      expression  = "request.method.matches('POST') && request.path.contains('Signup') && (origin.asn == 14061)"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithGoogle') && (origin.asn == 14061)"
+      description = "Deny Account Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean  ASNs"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "ec2_bot_blocking_signup_github" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "444"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithGithub') && (origin.asn == 16509 || origin.asn == 14618 || origin.asn == 396982)"
       description = "Deny Account Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean ASNs"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "ec2_bot_blocking_signup_github_contd" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "445"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithGithub') && (origin.asn == 14061)"
+      description = "Deny Account Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean  ASNs"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "ec2_bot_blocking_signup_email" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "446"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithEmail') && (origin.asn == 16509 || origin.asn == 14618 || origin.asn == 396982)"
+      description = "Deny Account Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean ASNs"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "ec2_bot_blocking_signup_email_contd" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "447"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithEmail') && (origin.asn == 14061)"
+      description = "Deny Account Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean  ASNs"
       preview     = false
     }
   }
@@ -441,8 +660,8 @@ variable "ec2_bot_blocking_apikey" {
   default = {
     def_rule = {
       action      = "deny(502)"
-      priority    = "444"
-      expression  = "request.method.matches('POST') && request.path.endsWith('API/CreateAPIKey') && (origin.asn == 16509 || origin.asn == 14618 || origin.asn == 396982)"
+      priority    = "448"
+      expression  = "request.method.matches('POST') && request.path.endsWith('API/v1/CreateAPIKey') && (origin.asn == 16509 || origin.asn == 14618 || origin.asn == 396982)"
       description = "Deny API Key Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean ASNs"
       preview     = false
     }
@@ -461,8 +680,8 @@ variable "ec2_bot_blocking_apikey_contd" {
   default = {
     def_rule = {
       action      = "deny(502)"
-      priority    = "445"
-      expression  = "request.method.matches('POST') && request.path.endsWith('API/CreateAPIKey') && (origin.asn == 14061)"
+      priority    = "449"
+      expression  = "request.method.matches('POST') && request.path.endsWith('API/v1/CreateAPIKey') && (origin.asn == 14061)"
       description = "Deny API Key Creation - Bots or Malicious Scripts from EC2 GCP, AWS, Digital Ocean ASNs"
       preview     = false
     }
@@ -481,8 +700,8 @@ variable "malicious_actor_signup" {
   default = {
     def_rule = {
       action      = "deny(502)"
-      priority    = "446"
-      expression  = "request.method.matches('POST') && request.path.contains('Signup') && (origin.asn == 36352 || origin.asn == 8075 || origin.asn == 20473)"
+      priority    = "450"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithEmail') && (origin.asn == 36352 || origin.asn == 8075 || origin.asn == 20473)"
       description = "Deny high spam rate ASN's for countries and regions implicitly permitted"
       preview     = true
     }
@@ -501,8 +720,8 @@ variable "malicious_actor_signup_contd" {
   default = {
     def_rule = {
       action      = "deny(502)"
-      priority    = "447"
-      expression  = "request.method.matches('POST') && request.path.contains('Signup') && (origin.asn == 9009)"
+      priority    = "451"
+      expression  = "request.method.matches('POST') && request.path.contains('signupWithEmail') && (origin.asn == 9009)"
       description = "Deny high spam rate ASN's for countries and regions implicitly permitted"
       preview     = true
     }
@@ -521,7 +740,7 @@ variable "malicious_key_creation" {
   default = {
     def_rule = {
       action      = "deny(502)"
-      priority    = "448"
+      priority    = "452"
       expression  = "request.method.matches('POST') && request.path.contains('CreateAPIKey') && (origin.asn == 36352 || origin.asn == 8075 || origin.asn == 20473)"
       description = "Deny high spam rate ASN's for countries and regions implicitly permitted"
       preview     = true
@@ -541,7 +760,7 @@ variable "malicious_key_creation_contd" {
   default = {
     def_rule = {
       action      = "deny(502)"
-      priority    = "449"
+      priority    = "453"
       expression  = "request.method.matches('POST') && request.path.contains('CreateAPIKey') && (origin.asn == 9009)"
       description = "Deny high spam rate ASN's for countries and regions implicitly permitted"
       preview     = true
@@ -557,41 +776,24 @@ variable "malicious_key_creation_contd" {
   )
 }
 
-### Ads TICKET-908 ###
-
-# ReCaptcha Enterprise with WAF integration limitation - https://stackoverflow.com/questions/76229084/cloud-armor-recaptcha-with-domain-validation
-
-# Since terraform doesn't look to support the `--recaptcha-action-site-keys` function/flag, you need to add '--recaptcha-action-site-keys "example-site-key-1"' via gcloud
-# https://cloud.google.com/sdk/docs/release-notes - For both 396 and 397 rule IDs
-
-# The `recaptcha_action_name` is currently supported, I just need to work out how to embed that in `armor.tf` - https://registry.terraform.io/modules/GoogleCloudPlatform/cloud-armor/google/latest?tab=inputs
-
-/*
-Ads gcloud bug raised here - https://cloud.google.com/support/docs/issue-trackers
-# https://issuetracker.google.com/u/1/issues/300157692
-crapi % gcloud beta compute security-policies rules update 396 --security-policy block-with-modsec-crs --description="test" --recaptcha-action-site-keys="x_account_registration_waf"
-ERROR: gcloud crashed (AttributeError): 'NoneType' object has no attribute 'exprOptions'
-*/
-
-variable "bot_captcha_action_token_allow" {
+variable "bot_captcha_whitelist_staging_dev" {
   default = {
     def_rule = {
       action                            = "rate_based_ban"
-      priority                          = "396"
+      priority                          = "389"
       expression                        = <<-EOT
-        request.path.endsWith('Signup') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid) && (token.recaptcha_action.action.matches('register/signup'))
+        (request.path.startsWith('https://staging.myapi.ai/API/v1/signupWith') || request.path.startsWith('https://development.myapi.ai/API/v1/signupWith')) && token.recaptcha_action.score >= 0.2 && token.recaptcha_action.action.contains('signup/')
       EOT
-      description                       = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
+      description                       = "Whitelist Lower reCAPTCHA Enterprise scores on Stag and Dev for testing"
       conform_action                    = "allow"
       exceed_action                     = "deny(429)"
       enforce_on_key                    = "IP"
-      rate_limit_threshold_count        = "2"
+      rate_limit_threshold_count        = "5"
       rate_limit_threshold_interval_sec = "10"
       ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
-      ban_threshold_count               = 2
+      ban_threshold_count               = 15
       ban_threshold_interval_sec        = 60
-      #recaptcha_action_name             = "register" # Does not implement here and instead using CEL expression
-      preview                           = true
+      preview                           = false
     }
   }
   type = map(object({
@@ -612,7 +814,121 @@ variable "bot_captcha_action_token_allow" {
   )
 }
 
-# Replaced with improved 396
+variable "bot_captcha_action_token_allow_google" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "390"
+      expression                        = <<-EOT
+        request.path.endsWith('signupWithGoogle') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid) && (token.recaptcha_action.action.matches('signup/google'))
+      EOT
+      description                       = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "2"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 2
+      ban_threshold_interval_sec        = 60
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
+variable "bot_captcha_action_token_allow_github" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "391"
+      expression                        = <<-EOT
+        request.path.endsWith('signupWithGithub') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid) && (token.recaptcha_action.action.matches('signup/github'))
+      EOT
+      description                       = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "2"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 2
+      ban_threshold_interval_sec        = 60
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
+variable "bot_captcha_action_token_allow_email" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "392"
+      expression                        = <<-EOT
+        request.path.endsWith('signupWithEmail') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid) && (token.recaptcha_action.action.matches('signup'))
+      EOT
+      description                       = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "2"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 2
+      ban_threshold_interval_sec        = 60
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
+# Replaced #397 with improved 396
 
 /*
 variable "bot_captcha_action_token_allow" {
@@ -620,9 +936,9 @@ variable "bot_captcha_action_token_allow" {
     def_rule = {
       action                = "allow"
       priority              = "397"
-      expression            = "request.path.endsWith('Signup') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
-      description           = "Allow reCAPTCHA Enterprise action token with a score no less than 0.8 to account creations and requires explicit recaptcha_action_name with rate-limit/banning"
-      recaptcha_action_name = "register"
+      expression            = "request.path.endsWith('signupWithEmail') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
+      description           = "Allow reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations and requires explicit Action Name"
+      recaptcha_action_name = "signup"
       preview               = true
     }
   }
@@ -637,14 +953,54 @@ variable "bot_captcha_action_token_allow" {
 }
 */
 
-variable "bot_captcha_action_token_deny" {
+variable "bot_captcha_action_token_deny_google" {
   default = {
     def_rule = {
       action      = "deny(403)"
-      priority    = "397"
-      expression  = "request.path.endsWith('Signup') && token.recaptcha_action.score < 0.8 && (token.recaptcha_action.valid)"
+      priority    = "393"
+      expression  = "request.path.endsWith('/signupWithGoogle') && token.recaptcha_action.score < 0.8 && (token.recaptcha_action.valid)"
       description = "Explicit Deny reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations as well as incorrect Action Name"
-      preview     = true
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "bot_captcha_action_token_deny_github" {
+  default = {
+    def_rule = {
+      action      = "deny(403)"
+      priority    = "394"
+      expression  = "request.path.endsWith('signupWithGithub') && token.recaptcha_action.score < 0.8 && (token.recaptcha_action.valid)"
+      description = "Explicit Deny reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations as well as incorrect Action Name"
+      preview     = false
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "bot_captcha_action_token_deny_email" {
+  default = {
+    def_rule = {
+      action      = "deny(403)"
+      priority    = "395"
+      expression  = "request.path.endsWith('signupWithEmail') && token.recaptcha_action.score < 0.8 && (token.recaptcha_action.valid)"
+      description = "Explicit Deny reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations as well as incorrect Action Name"
+      preview     = false
     }
   }
   type = map(object({
@@ -665,10 +1021,10 @@ variable "bot_captcha_action_token_challenge" {
     def_rule = {
       action      = "deny(502)"
       priority    = "450"
-      expression  = "request.path.endsWith('Signup') && token.recaptcha_action.score == 0.5 && (token.recaptcha_action.valid)"
+      expression  = "request.path.endsWith('signupWithEmail') && token.recaptcha_action.score == 0.5 && (token.recaptcha_action.valid)"
       description = "Challenge reCAPTCHA Enterprise action-token with a score no less than 0.8 to account creations"
       preview     = true
-      recaptcha_action_name = "register"
+      recaptcha_action_name = "signup"
     }
   }
   type = map(object({
@@ -688,7 +1044,7 @@ variable "bot_captcha_session_token" {
     def_rule = {
       action      = "deny(502)"
       priority    = "459"
-      expression  = "request.path.endsWith('Signup') && token.recaptcha_session.score >= 0.8 && (token.recaptcha_action.valid)"
+      expression  = "request.path.endsWith('signupWithEmail') && token.recaptcha_session.score >= 0.8 && (token.recaptcha_action.valid)"
       description = "PLACEHOLDER - Deny reCAPTCHA Enterprise session-token with a score no less than 0.8 to account creations"
       preview     = true
     }
@@ -703,8 +1059,6 @@ variable "bot_captcha_session_token" {
   )
 }
 */
-
-# Enterprise token lives here - https://console.cloud.google.com/security/recaptcha?project=xxxx-xxxx-xxxx (redacted)
 
 /*
 variable "ec2_bot_monitoring" {
@@ -728,9 +1082,9 @@ variable "ec2_bot_monitoring" {
 }
 */
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # OWASP CRS Rules
-# ---------------------------------
+# ------------------------------------------------------------------------------
 variable "owasp_rules" {
   default = {
     #https://cloud.google.com/armor/docs/rule-tuning#sql_injection_sqli
@@ -780,10 +1134,10 @@ variable "owasp_rules" {
       #expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942110-sqli','owasp-crs-v030001-id942120-sqli','owasp-crs-v030001-id942150-sqli','owasp-crs-v030001-id942180-sqli','owasp-crs-v030001-id942200-sqli','owasp-crs-v030001-id942210-sqli','owasp-crs-v030001-id942260-sqli','owasp-crs-v030001-id942300-sqli','owasp-crs-v030001-id942310-sqli','owasp-crs-v030001-id942330-sqli','owasp-crs-v030001-id942340-sqli','owasp-crs-v030001-id942380-sqli','owasp-crs-v030001-id942390-sqli','owasp-crs-v030001-id942400-sqli','owasp-crs-v030001-id942410-sqli','owasp-crs-v030001-id942430-sqli','owasp-crs-v030001-id942440-sqli','owasp-crs-v030001-id942450-sqli','owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
 
       ### Detect Level 1 & 2
-      expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli']) && request.path.endsWith('API/Auth')"
+      expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli']) && request.path.endsWith('API/v1/Auth')"
 
       ### Detect Level 1,2 & 3
-      #expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli']) && request.path.endsWith('API/Auth')"
+      #expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli']) && request.path.endsWith('API/v1/Auth')"
 
       ### Detect Level 1,2,3 & 4
       #expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
@@ -801,7 +1155,7 @@ variable "owasp_rules" {
       #expression  = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942251-sqli','owasp-crs-v030001-id942420-sqli','owasp-crs-v030001-id942431-sqli','owasp-crs-v030001-id942460-sqli','owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli'])"
 
       ### Detect Level 1,2 & 3
-      expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli']) && request.path.endsWith('API/Auth')"
+      expression = "evaluatePreconfiguredExpr('sqli-stable',['owasp-crs-v030001-id942421-sqli','owasp-crs-v030001-id942432-sqli']) && request.path.endsWith('API/v1/Auth')"
 
       ### Detect Level 1,2,3 & 4
       #expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
@@ -960,10 +1314,10 @@ variable "owasp_rules" {
   )
 }
 
-# ------------------------------------------------------------------------------
-# Custom OWASP CRS Modsec Hacks - TICKET-816 - Ads
+# ---------------------------------------------------------------------------------------------------------------------------
+# Custom OWASP CRS Modsec Hacks - RISK-816 - Ads
 # Defined outside of the Dynamic rule block, for when OWASP CRS defaults are too sensitive, regardless of paranoia levels
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
 
 variable "xss_based_script_requesturls" {
   default = {
@@ -985,11 +1339,11 @@ variable "xss_based_script_requesturls" {
   )
 }
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Manual HTTP Method Enforcements
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # NFR submitted with GCP who do not support enforcing HTTP Version
-# `evaluatePreconfiguredExpr('methodenforcement-v33-stable')` OWASP CRS rule is too prone to many false positives and TICKETy, even with Paranoia Level 1
+# `evaluatePreconfiguredExpr('methodenforcement-v33-stable')` OWASP CRS rule is too prone to many false positives and risky, even with Paranoia Level 1
 
 variable "http_method_protect_rule" {
   default = {
@@ -1051,11 +1405,11 @@ variable "http_method_protect_rule_block" {
   )
 }
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Custom gRPC rule
-# ---------------------------------
+# ------------------------------------------------------------------------------
 
-variable "app_grpc_rule" {
+variable "dory_grpc_rule" {
   default = {
     def_rule = {
       action      = "deny(404)"
@@ -1075,9 +1429,9 @@ variable "app_grpc_rule" {
   )
 }
 
-# ---------------------------------
+# ------------------------------------------------------------------------------
 # Custom GCP-Driven CVE & Log4j rules
-# ---------------------------------
+# ------------------------------------------------------------------------------
 variable "apache_log4j_rule" {
   default = {
     # https://cloud.google.com/armor/docs/rule-tuning#cves_and_other_vulnerabilities

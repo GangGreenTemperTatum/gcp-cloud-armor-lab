@@ -776,13 +776,51 @@ variable "malicious_key_creation_contd" {
   )
 }
 
-variable "bot_captcha_whitelist_staging_dev" {
+variable "bot_captcha_whitelist_dev" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "388"
+      expression                        = <<-EOT
+        request.headers['host'].lower().contains('dev.myapi.ai') && request.path.contains('/API/v1/signupWith') && request.method=='POST' && token.recaptcha_action.score >= 0.2 && token.recaptcha_action.action.contains('register/')
+      EOT
+      description                       = "Whitelist Lower reCAPTCHA Enterprise scores on Stag and Dev for testing"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "5"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 15
+      ban_threshold_interval_sec        = 60
+      preview                           = false
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
+variable "bot_captcha_whitelist_stg" {
   default = {
     def_rule = {
       action                            = "rate_based_ban"
       priority                          = "389"
       expression                        = <<-EOT
-        (request.path.startsWith('https://staging.myapi.ai/API/v1/signupWith') || request.path.startsWith('https://development.myapi.ai/API/v1/signupWith')) && request.method=='POST' && token.recaptcha_action.score >= 0.2 && token.recaptcha_action.action.contains('signup/')
+        request.headers['host'].lower().contains('staging.myapi.ai') && request.path.contains('/API/v1/signupWith') && request.method=='POST' && token.recaptcha_action.score >= 0.2 && token.recaptcha_action.action.contains('register/')
       EOT
       description                       = "Whitelist Lower reCAPTCHA Enterprise scores on Stag and Dev for testing"
       conform_action                    = "allow"

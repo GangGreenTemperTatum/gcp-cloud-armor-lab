@@ -359,7 +359,37 @@ resource "google_compute_security_policy" "policy" {
   }
 
   dynamic "rule" {
-    for_each = var.bot_captcha_whitelist_staging_dev
+    for_each = var.bot_captcha_whitelist_stg
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      #actionname  = rule.value.recaptcha_action_name
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.bot_captcha_whitelist_dev
     content {
       action      = rule.value.action
       priority    = rule.value.priority

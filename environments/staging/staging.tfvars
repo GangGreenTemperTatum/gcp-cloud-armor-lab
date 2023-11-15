@@ -9,6 +9,7 @@ default_zones = [
 ]
 
 recapatcha_allowed_domains = [
+  "localhost",
   "stg.x.my-development-environment.com",
   "staging.api.my-development-environment.com"
   "staging.api.x.my-development-environment.com"

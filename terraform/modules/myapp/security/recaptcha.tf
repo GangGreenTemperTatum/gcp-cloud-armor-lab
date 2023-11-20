@@ -6,10 +6,11 @@ resource "google_recaptcha_enterprise_key" "recaptcha_enterprise_scoring_key" {
   project      = var.project_id
 
   web_settings {
-    integration_type  = "SCORE"
-    allow_all_domains = false
-    allow_amp_traffic = false
-    allowed_domains   = var.recapatcha_allowed_domains # All subdomains of an allowed domain are automatically allowed
+    integration_type              = "SCORE"
+    allow_all_domains             = false
+    allow_amp_traffic             = false
+    allowed_domains               = var.recapatcha_allowed_domains # All subdomains of an allowed domain are automatically allowed
+    challenge_security_preference = "CHALLENGE_SECURITY_PREFERENCE_UNSPECIFIED"
   }
 
   labels = {

@@ -22,10 +22,19 @@ variable "projects_allowed_to_access_bigquery" {
   default     = ["projects/XXXYYY"]
 }
 
+# The following SA's will require adding:
+# The SA used for CI/CD to merge the changes to GCP
+# The SA's auto-created per-log-router sink via terraform/modules/myapp/logging/bigquery_sinks.tf (I.E 3 x additional SA's per SA)
+
 variable "looker_service_account" {
   description = "GCP Service Account that Looker uses to access BigQuery"
   type        = string
-  default     = "serviceAccount:XXXYYY.iam.gserviceaccount.com"
+  default     = [
+    "serviceAccount:XXXYYY.iam.gserviceaccount.com",#CI/CD Terraform SA
+    "serviceAccount:XXXYYY.iam.gserviceaccount.com",#prod log router SA
+    "serviceAccount:XXXYYY.iam.gserviceaccount.com",#dev log router SA
+    "serviceAccount:XXXYYY.iam.gserviceaccount.com"#stg log router SA
+  ]
 }
 
 variable "looker_project" {

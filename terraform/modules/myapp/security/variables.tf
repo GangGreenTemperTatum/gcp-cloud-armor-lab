@@ -776,6 +776,27 @@ variable "malicious_key_creation_contd" {
   )
 }
 
+# https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967/
+variable "malicious_tls_fingerprints" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "454"
+      expression  = "securityPolicyRequestData.tlsJa3Fingerprint == 'e7d705a3286e19ea42f587b344ee6865' || securityPolicyRequestData.tlsJa3Fingerprint == '6734f37431670b3ab4292b8f60f29984' || securityPolicyRequestData.tlsJa3Fingerprint == '4d7a28d6f2263ed61de88ca66eb011e3'"
+      description = "Monitor known botnet TLS fingerprints"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
 variable "bot_captcha_whitelist_dev" {
   default = {
     def_rule = {

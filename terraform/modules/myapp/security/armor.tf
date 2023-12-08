@@ -359,6 +359,21 @@ resource "google_compute_security_policy" "policy" {
   }
 
   dynamic "rule" {
+    for_each = var.malicious_tls_fingerprints
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
     for_each = var.bot_captcha_whitelist_stg
     content {
       action      = rule.value.action

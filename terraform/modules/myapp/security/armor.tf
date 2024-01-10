@@ -174,6 +174,36 @@ resource "google_compute_security_policy" "policy" {
     }
   }
 
+  dynamic "rule" {
+    for_each = var.aibot_crawler_rules_tolower
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.aibot_crawler_rules_toupper
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+    }
+  }
+
   # ---------------------------------
   # Bot Detection & Captcha rules
   # ---------------------------------

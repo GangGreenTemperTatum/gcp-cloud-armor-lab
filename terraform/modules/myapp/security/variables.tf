@@ -217,7 +217,47 @@ variable "gpt_crawler_rules" {
     def_rule = {
       action      = "deny(502)"
       priority    = "201"
-      expression  = "(has(request.headers['user-agent']) && request.headers['user-agent'].contains('GPTBot')) || (has(request.headers['User-Agent']) && request.headers['User-Agent'].matches('(?i:gptbot)'))"
+      expression  = "(has(request.headers['user-agent']) && request.headers['user-agent'].contains('(?i:gpt)')) || (has(request.headers['User-Agent']) && request.headers['User-Agent'].contains('(?i:gpt)'))"
+      description = "Detect GPTBot crawling and activity"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "aibot_crawler_rules_tolower" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "202"
+      expression  = "(has(request.headers['user-agent']) && request.headers['user-agent'].contains('anthropic') || request.headers['user-agent'].contains('claude') || request.headers['user-agent'].contains('twitter') || request.headers['user-agent'].contains('facebook'))"
+      description = "Detect GPTBot crawling and activity"
+      preview     = true
+    }
+  }
+  type = map(object({
+    action      = string
+    priority    = string
+    expression  = string
+    description = string
+    preview     = bool
+    })
+  )
+}
+
+variable "aibot_crawler_rules_toupper" {
+  default = {
+    def_rule = {
+      action      = "deny(502)"
+      priority    = "203"
+      expression  = "(has(request.headers['User-Agent']) && request.headers['User-Agent'].contains('(?i:anthropic)') || request.headers['User-Agent'].contains('(?i:claude)') || request.headers['User-Agent'].contains('(?i:twitter)') || request.headers['User-Agent'].contains('(?i:facebook)'))"
       description = "Detect GPTBot crawling and activity"
       preview     = true
     }

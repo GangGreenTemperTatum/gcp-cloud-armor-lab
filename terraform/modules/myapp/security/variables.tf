@@ -174,6 +174,7 @@ variable "banned_countries" {
       action      = "deny(502)"
       priority    = "100"
       expression  = "'[RU, SY, BY, KP, CN, IR, CU]'.contains(origin.region_code)"
+      #expression  = "origin.region_code.matches('^RU,SY,BY,KP,CN,IR,CU$')"
       description = "Block prohibited countries as per ISO 3166-1 alpha 2 region codes"
       preview     = false
     }

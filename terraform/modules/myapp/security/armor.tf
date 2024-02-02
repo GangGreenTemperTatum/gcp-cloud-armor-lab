@@ -204,6 +204,68 @@ resource "google_compute_security_policy" "policy" {
     }
   }
 
+# ---------------------------------------------------------------------------------------------------------------------------
+# Throttling & ReCaptcha Enterprise Traffic Rules
+# ---------------------------------------------------------------------------------------------------------------------------
+
+  dynamic "rule" {
+    for_each = var.throttle_rules_sample_endpoint_gcp_light_rate_limit
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.throttle_rules_sample_endpoint
+    content {
+      action      = rule.value.action
+      priority    = rule.value.priority
+      description = rule.value.description
+      preview     = rule.value.preview
+      match {
+        expr {
+          expression = rule.value.expression
+        }
+      }
+      rate_limit_options {
+        conform_action   = rule.value.conform_action
+        exceed_action    = rule.value.exceed_action
+        enforce_on_key   = rule.value.enforce_on_key
+        ban_duration_sec = rule.value.ban_duration_sec
+        rate_limit_threshold {
+          count        = rule.value.rate_limit_threshold_count
+          interval_sec = rule.value.rate_limit_threshold_interval_sec
+        }
+        ban_threshold {
+          count        = rule.value.ban_threshold_count
+          interval_sec = rule.value.ban_threshold_interval_sec
+        }
+      }
+    }
+  }
+
   # ---------------------------------
   # Bot Detection & Captcha rules
   # ---------------------------------

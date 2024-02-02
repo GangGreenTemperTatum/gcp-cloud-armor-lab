@@ -277,6 +277,80 @@ variable "aibot_crawler_rules_toupper" {
 # Throttling & ReCaptcha Enterprise Traffic Rules
 # ---------------------------------------------------------------------------------------------------------------------------
 
+# The following rule throttles calls against an API endpoint (`matches` is regex, so <endpoint>*) with regex but increases threshold from GCP
+
+variable "throttle_rules_sample_endpoint_gcp_light_rate_limit" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "250"
+      expression                        = "request.path.matches('/v1/<endpoint>') && (inIpRange(origin.ip, '34.128.0.0/10') || origin.asn == 396982)"
+      description                       = "Higher threshold for GCP Dataflow. Ban abuse & rate limit >50 requests in 10 seconds against any datasets endpoint and ban if >1000 requests in 60 seconds (ban overrides rate-limit)"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "50"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 1000
+      ban_threshold_interval_sec        = 60
+      preview                           = true
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
+variable "throttle_rules_sample_endpoint" {
+  default = {
+    def_rule = {
+      action                            = "rate_based_ban"
+      priority                          = "251"
+      expression                        = "request.path.matches('/v1/<endpoint>')"
+      description                       = "Ban abuse & rate limit >25 requests in 10 seconds against any datasets endpoint and ban if >1000 requests in 60 seconds (ban overrides rate-limit)"
+      conform_action                    = "allow"
+      exceed_action                     = "deny(429)"
+      enforce_on_key                    = "IP"
+      rate_limit_threshold_count        = "25"
+      rate_limit_threshold_interval_sec = "10"
+      ban_duration_sec                  = 3600 # Terraform docs are incorrect and this is mandatory
+      ban_threshold_count               = 1000
+      ban_threshold_interval_sec        = 60
+      preview                           = true
+    }
+  }
+  type = map(object({
+    action                            = string
+    priority                          = string
+    expression                        = string
+    description                       = string
+    conform_action                    = string
+    exceed_action                     = string
+    enforce_on_key                    = string
+    rate_limit_threshold_count        = number
+    rate_limit_threshold_interval_sec = number
+    ban_duration_sec                  = number
+    ban_threshold_count               = number
+    ban_threshold_interval_sec        = number
+    preview                           = bool
+    })
+  )
+}
+
 /*
 # ---------------------------------------------------------------------------------------------------------------------------
 # 				PLEASE READ
